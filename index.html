@@ -117,6 +117,12 @@ input[type=text],input[type=password],input[type=date],select{width:100%;min-wid
 .fact[data-tone]{background:var(--t-bg);color:var(--t-fg)}
 .fact[data-tone] span{color:var(--t-fg)}
 .nogoal{margin:0;color:var(--muted);font-size:14px}
+.dlist{gap:14px}
+.drow{display:grid;gap:6px;padding-top:12px;border-top:1px solid var(--line)}
+.drow:first-child{border-top:0;padding-top:0}
+.who2{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.who2 b{font-family:var(--font-display);font-size:20px}
+.drow .of b{color:var(--t-fg);font-weight:600}
 
 form.entry{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
 #fAmt{font-family:var(--font-display);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}
@@ -262,7 +268,7 @@ function load(quiet){
     var wd=workdays(S.cfg);if(!S.day||wd.indexOf(S.day)<0)S.day=defaultDay(wd);
     if(S.role==='equipe'){
       if(!S.me||!sellerOf(S.me)){S.me=lsGet(LSK+'-me')||'';if(!sellerOf(S.me))S.me='';}
-      S.view=S.me;
+      if(S.view!=='team'&&S.view!==S.me)S.view=ready(S.cfg)?'team':S.me;
     }else if(!S.view||(S.view!=='team'&&S.view!=='etapa'&&!sellerOf(S.view))){S.view=ready(S.cfg)?'team':'etapa';}
     render();
   }).catch(function(){
@@ -303,7 +309,7 @@ function pickHTML(){
     S.cfg.sellers.map(function(s){return '<button type="button" data-me="'+esc(s.name)+'">'+esc(s.name)+'</button>';}).join('')+'</div></div>';
 }
 function headHTML(){
-  var title=S.role==='gestor'?'Gestão':(S.me||'Metas');
+  var title=S.role==='gestor'?'Gestão':(S.view==='team'?'Resumo':(S.me||'Metas'));
   return '<header class="top"><div><p class="eyebrow">Loja · metas por etapa</p><h1>'+esc(title)+'</h1></div><div class="row" style="gap:8px">'+
     (S.demo?'<span class="pill" data-s="demo">Demonstração</span>':'<span class="pill" data-s="'+(S.error?'err':'ok')+'">'+(S.error?'Sem conexão':'Sincronizado')+'</span>')+
     '<button type="button" class="pill" id="refresh">Atualizar</button><button type="button" class="pill" id="logout">Sair</button></div></header>'+
@@ -321,8 +327,12 @@ function stageHTML(wd){
 }
 function tabsHTML(){
   var out='';
+  if(S.role==='equipe'&&ready(S.cfg)){
+    out+='<button type="button" class="tab" role="tab" data-v="team" aria-selected="'+(S.view==='team')+'"><b>Resumo</b><span>loja toda</span></button>'+
+      '<button type="button" class="tab" role="tab" data-v="'+esc(S.me)+'" aria-selected="'+(S.view===S.me)+'"><b>'+esc(S.me)+'</b><span>meu painel e lançar</span></button>';
+  }
   if(S.role==='gestor'){
-    out+='<button type="button" class="tab" role="tab" data-v="team" aria-selected="'+(S.view==='team')+'"><b>Equipe</b><span>consolidado</span></button>';
+    out+='<button type="button" class="tab" role="tab" data-v="team" aria-selected="'+(S.view==='team')+'"><b>Resumo</b><span>loja toda</span></button>';
     S.cfg.sellers.forEach(function(s){
       var tot=sum(S.sales,function(x){return x.seller===s.name;});
       out+='<button type="button" class="tab" role="tab" data-v="'+esc(s.name)+'" aria-selected="'+(S.view===s.name)+'"><b>'+esc(s.name)+'</b><span>'+fmt(tot)+'</span></button>';
@@ -367,19 +377,31 @@ function entryHTML(name,wd){
 function sellerView(name,wd){
   return dayPick(wd)+'<div class="stack">'+CATS.map(function(c){return catHTML(name,c,wd);}).join('')+'</div>'+entryHTML(name,wd);
 }
-function teamView(wd){
-  var h='<section class="card"><h2>Equipe na etapa</h2><div class="tblwrap"><table><thead><tr><th>Vendedor</th><th>Aparelhos</th><th>Acessórios</th></tr></thead><tbody>';
-  var tot={aparelho:{g:0,s:0},acessorio:{g:0,s:0}};
-  S.cfg.sellers.forEach(function(s){
-    h+='<tr><td>'+esc(s.name)+'</td>'+CATS.map(function(cat){
-      var c=calc(s.name,cat,wd,S.day);tot[cat.id].s+=c.total;
-      if(!s.goal||!c.goal)return '<td>'+(c.total?fmt(c.total):'–')+'</td>';
-      tot[cat.id].g+=c.goal;
-      return '<td data-tone="'+tone(c.pStage,true)+'"><span>'+fmt(c.total)+' de '+fmt(c.goal)+' · '+pct(c.pStage)+'</span></td>';
-    }).join('')+'</tr>';
-  });
-  h+='</tbody><tfoot><tr><td>Total da loja</td>'+CATS.map(function(cat){var t=tot[cat.id];return '<td>'+fmt(t.s)+(t.g?' de '+fmt(t.g)+' · '+pct(t.s/t.g):'')+'</td>';}).join('')+'</tr></tfoot></table></div>'+
-    '<p class="small">A planilha do Google tem o mesmo consolidado, mais o detalhe de cada vendedor por dia.</p></section>';
+function dashView(wd){
+  var D=S.day,t=todayISO(),i=wd.indexOf(D);
+  var h='<section class="card"><div class="row"><h2>Resumo da loja</h2><span class="of">vendido até '+dayLabel(D)+(D===t?' (hoje)':'')+'</span></div>'+
+    '<p class="small">Soma de quem tem meta nesta etapa. A meta da loja é a meta de cada vendedor multiplicada pelo número de vendedores com meta.</p></section>';
+  h+='<div class="stack">'+CATS.map(function(cat){
+    var g=0,sold=0,day=0,extra=0,rows='';
+    S.cfg.sellers.forEach(function(s){
+      var c=calc(s.name,cat,wd,D);
+      if(s.goal&&c.goal){
+        g+=c.goal;sold+=c.total;day+=c.day;
+        rows+='<li class="drow" data-tone="'+tone(c.pStage,true)+'"><div class="who2"><b>'+esc(s.name)+'</b><span class="of">'+fmt(c.total)+' de '+fmt(c.goal)+'</span></div>'+
+          '<div class="bar"><i style="width:'+w100(c.pStage)+'%"></i></div>'+
+          '<div class="row"><span class="of">'+(c.faltaEtapa>0.004?'falta <b>'+fmt(c.faltaEtapa)+'</b>':'<b>meta batida</b>')+'</span><span class="of">'+pct(c.pStage)+'</span></div></li>';
+      }else{extra+=c.total;}
+    });
+    var p=g?sold/g:0,tt=tone(p,g>0),falta=Math.max(0,g-sold);
+    var hd='<article class="card cat"><div class="row"><h2>'+cat.label+'</h2><span class="of">meta da loja '+(g?fmt(g):'não definida')+'</span></div>';
+    if(!g)return hd+'<p class="nogoal">Sem meta de '+cat.label.toLowerCase()+' nesta etapa.</p></article>';
+    return hd+'<div class="hoje" data-tone="'+tt+'"><span class="lbl">Falta para a meta da loja</span><span class="big"'+(falta<=0.004?' style="font-size:32px"':'')+'>'+(falta<=0.004?'Meta da loja batida':fmt(falta))+'</span>'+
+      '<div class="bar"><i style="width:'+w100(p)+'%"></i></div><span class="sub">Vendido '+fmt(sold)+' de '+fmt(g)+' · '+pct(p)+'</span></div>'+
+      '<div class="facts"><div class="fact"><b>'+fmt(day)+'</b><span>vendido em '+dayLabel(D)+'</span></div>'+
+      '<div class="fact"><b>'+(wd.length-i)+' '+((wd.length-i)>1?'dias':'dia')+'</b><span>restam, contando este</span></div></div>'+
+      '<ul class="plain dlist">'+rows+'</ul>'+
+      (extra>0?'<p class="small">Fora da meta (vendedores sem meta): '+fmt(extra)+'.</p>':'')+'</article>';
+  }).join('')+'</div>';
   return h;
 }
 function etapaView(){
@@ -404,11 +426,11 @@ function render(){
     h+=stageHTML(wd);
     if(S.view==='etapa')h+=etapaView();
     else if(!ready(S.cfg))h+=etapaView();
-    else if(S.view==='team')h+=teamView(wd);
+    else if(S.view==='team')h+=dayPick(wd)+dashView(wd);
     else h+=sellerView(S.view,wd);
   }else{
     h+=stageHTML(wd);
-    if(ready(S.cfg))h+=sellerView(S.me,wd);
+    if(ready(S.cfg))h+=S.view==='team'?dayPick(wd)+dashView(wd):sellerView(S.me,wd);
   }
   h+='<p class="legend"><span data-tone="low"><i></i>Abaixo de 40%</span><span data-tone="mid"><i></i>40% a 79%</span><span data-tone="ok"><i></i>80% a 99%</span><span data-tone="done"><i></i>Meta batida</span></p>';
   app.innerHTML=h;bind();
@@ -426,7 +448,7 @@ function bind(){
     S.code=c;S.loginErr='';S.loading=true;render();
     load(false).then(function(){if(S.cfg&&S.code)lsSet(LSK+'-code',S.code);});
   };
-  document.querySelectorAll('[data-me]').forEach(function(b){b.onclick=function(){S.me=b.dataset.me;lsSet(LSK+'-me',S.me);S.view=S.me;render();};});
+  document.querySelectorAll('[data-me]').forEach(function(b){b.onclick=function(){S.me=b.dataset.me;lsSet(LSK+'-me',S.me);S.view='team';render();};});
   if(el=q('#logout'))el.onclick=function(){if(S.role==='equipe'){S.me='';lsDel(LSK+'-me');}logout(false);};
   if(el=q('#refresh'))el.onclick=function(){load(false).then(function(){toast('Atualizado.');});};
   document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){S.view=b.dataset.v;render();};});
