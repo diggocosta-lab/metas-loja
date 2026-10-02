@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Metas da Loja</title>
+<meta name="theme-color" content="#16408c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Metas">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+:root{
+  --bg:#f1f4f9; --surface:#ffffff; --ink:#132033; --muted:#566679; --line:#d8dfea; --soft:#e7ecf4;
+  --accent:#16408c; --accent-ink:#ffffff;
+  --low-bg:#fde6e3; --low-fg:#8f1d12; --low-solid:#d6382a;
+  --mid-bg:#fff1cf; --mid-fg:#6a4200; --mid-solid:#e0a010;
+  --ok-bg:#dcf3e3; --ok-fg:#0d5a2a; --ok-solid:#1e9a4e;
+  --done-bg:#1b8a45; --done-fg:#ffffff;
+  --none-bg:#edf0f6; --none-fg:#44546a;
+  --font-display:'Barlow Condensed','Arial Narrow',system-ui,sans-serif;
+  --font-body:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1520; --surface:#152130; --ink:#e7edf6; --muted:#9aaabd; --line:#26364a; --soft:#1f2e42;
+    --accent:#8ab0ff; --accent-ink:#0d1520;
+    --low-bg:#3b1b18; --low-fg:#ffb7ad; --low-solid:#ef5b4c;
+    --mid-bg:#392d0c; --mid-fg:#ffd682; --mid-solid:#e6a817;
+    --ok-bg:#133220; --ok-fg:#92e2ae; --ok-solid:#2fb862;
+    --done-bg:#23a459; --done-fg:#04130a;
+    --none-bg:#1d2b3d; --none-fg:#a9b8cb;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1520; --surface:#152130; --ink:#e7edf6; --muted:#9aaabd; --line:#26364a; --soft:#1f2e42;
+  --accent:#8ab0ff; --accent-ink:#0d1520;
+  --low-bg:#3b1b18; --low-fg:#ffb7ad; --low-solid:#ef5b4c;
+  --mid-bg:#392d0c; --mid-fg:#ffd682; --mid-solid:#e6a817;
+  --ok-bg:#133220; --ok-fg:#92e2ae; --ok-solid:#2fb862;
+  --done-bg:#23a459; --done-fg:#04130a;
+  --none-bg:#1d2b3d; --none-fg:#a9b8cb;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.4;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+button,input,select{font:inherit;color:inherit}
+.app{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:18px 56px;display:grid;gap:14px}
+.app>*{min-width:0}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.eyebrow{margin:0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:2px 0 0;font-family:var(--font-display);font-weight:700;font-size:34px;line-height:1;text-wrap:balance}
+h2{margin:0;font-family:var(--font-display);font-weight:700;font-size:24px}
+.pill{font-size:12px;font-weight:600;padding:5px 10px;border-radius:99px;background:var(--none-bg);color:var(--none-fg);border:0}
+.pill[data-s=ok]{background:var(--ok-bg);color:var(--ok-fg)}
+.pill[data-s=err]{background:var(--low-bg);color:var(--low-fg)}
+.pill[data-s=demo]{background:var(--mid-bg);color:var(--mid-fg)}
+.banner{margin:0;padding:10px 12px;border-radius:8px;background:var(--mid-bg);color:var(--mid-fg);font-size:14px}
+.banner.err{background:var(--low-bg);color:var(--low-fg)}
+
+[data-tone=low]{--t-bg:var(--low-bg);--t-fg:var(--low-fg);--t-solid:var(--low-solid)}
+[data-tone=mid]{--t-bg:var(--mid-bg);--t-fg:var(--mid-fg);--t-solid:var(--mid-solid)}
+[data-tone=ok]{--t-bg:var(--ok-bg);--t-fg:var(--ok-fg);--t-solid:var(--ok-solid)}
+[data-tone=done]{--t-bg:var(--done-bg);--t-fg:var(--done-fg);--t-solid:var(--done-bg)}
+[data-tone=none]{--t-bg:var(--none-bg);--t-fg:var(--none-fg);--t-solid:var(--line)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.lbl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.of{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+.stack{display:grid;gap:14px}
+.big30{font-family:var(--font-display);font-weight:700;font-size:30px;line-height:1}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{min-width:34px;text-align:center;padding:4px 6px;border-radius:6px;font-size:12px;font-weight:600;background:var(--none-bg);color:var(--none-fg);font-variant-numeric:tabular-nums}
+.chip[data-now]{outline:2px solid var(--accent);outline-offset:1px}
+.chip[data-past]{opacity:.55}
+.bar{height:8px;border-radius:99px;background:var(--soft);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--t-solid)}
+
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.tab{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left;display:grid;gap:2px}
+.tab b{font-family:var(--font-display);font-size:21px;line-height:1}
+.tab span{font-size:12px;color:var(--muted)}
+.tab[aria-selected=true]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.fld{display:grid;gap:4px;min-width:0}
+.fld>span{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+input[type=text],input[type=password],input[type=date],select{width:100%;min-width:0;height:44px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.btn{height:44px;padding:0 18px;border:0;border-radius:8px;background:var(--accent);color:var(--accent-ink);font-weight:600;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);height:32px;padding:0 10px;font-size:13px}
+.btn.ghost[data-arm]{color:var(--low-fg);border-color:var(--low-solid);background:var(--low-bg)}
+.btn.line{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+
+.cat{display:grid;gap:12px}
+.hoje{display:grid;gap:6px;padding:14px;border-radius:10px;background:var(--t-bg);color:var(--t-fg)}
+.hoje .lbl{color:var(--t-fg)}
+.hoje .big{font-family:var(--font-display);font-weight:700;font-size:48px;line-height:1;font-variant-numeric:tabular-nums}
+.hoje .bar{background:rgba(0,0,0,.14)}
+.hoje[data-tone=done] .bar i{background:var(--done-fg)}
+.hoje .sub{font-size:14px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.fact{display:grid;gap:2px;padding:10px;border-radius:8px;background:var(--none-bg)}
+.fact b{font-family:var(--font-display);font-size:22px;line-height:1.1;font-variant-numeric:tabular-nums}
+.fact span{font-size:12px;color:var(--muted)}
+.fact[data-tone]{background:var(--t-bg);color:var(--t-fg)}
+.fact[data-tone] span{color:var(--t-fg)}
+.nogoal{margin:0;color:var(--muted);font-size:14px}
+
+form.entry{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+#fAmt{font-family:var(--font-display);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden;height:44px}
+.seg label{display:grid}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:grid;place-items:center;font-weight:600;cursor:pointer;background:var(--bg);color:var(--muted)}
+.seg input:checked+span{background:var(--accent);color:var(--accent-ink)}
+.seg input:focus-visible+span{outline:3px solid var(--accent);outline-offset:-3px}
+ul.plain{list-style:none;margin:0;padding:0;display:grid}
+.log li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.log li:first-child{border-top:0}
+.log .when{color:var(--muted);font-size:13px}
+.empty{margin:0;color:var(--muted);font-size:14px}
+.tblwrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+th,td{padding:7px 8px;text-align:right;border-top:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{font-size:12px;color:var(--muted);font-weight:600;border-top:0}
+tfoot td{font-weight:700}
+td[data-tone] span{display:inline-block;padding:2px 8px;border-radius:6px;background:var(--t-bg);color:var(--t-fg);font-weight:600}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.small{font-size:13px;color:var(--muted);margin:0}
+.checks{display:flex;gap:8px;flex-wrap:wrap}
+.checks label{display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin:0;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;background:var(--t-solid);display:inline-block}
+.login{max-width:420px;margin:8vh auto 0}
+.who{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.who button{height:64px;font-family:var(--font-display);font-size:24px;font-weight:700;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer}
+.who button:hover{border-color:var(--accent)}
+.err{color:var(--low-fg)}
+.setup{display:grid;gap:10px}
+.setup code{background:var(--none-bg);padding:2px 6px;border-radius:5px;font-size:13px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:min(92vw,460px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;box-shadow:0 6px 24px rgba(0,0,0,.25);z-index:5}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .35s ease}}
+@media (max-width:420px){h1{font-size:30px}.hoje .big{font-size:42px}}
+</style>
+</head>
+<body>
+<main class="app" id="app"></main>
+<div id="toast" role="status" hidden></div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO: cole aqui o endereço do App da Web do Google
+   (o que termina em /exec). Veja o passo a passo no LEIA-ME.
+   ============================================================ */
+var API_URL = 'https://script.google.com/macros/s/AKfycby0rr5kD7_1sZEI3fVIo9SakbWsO3cGeQdoB9IlFBRVCpf2VGfFjBauR98LCf-zswMK/exec';
+
+(function(){
+'use strict';
+var DOW=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+var CATS=[{id:'aparelho',label:'Aparelhos',one:'Aparelho',key:'goalA'},{id:'acessorio',label:'Acessórios',one:'Acessório',key:'goalB'}];
+var LSK='metas-loja-v1';
+var S={api:API_URL,demo:false,code:'',role:'',me:'',view:'',day:null,cfg:null,sales:[],now:'',loading:false,error:'',busy:false,loginErr:''};
+
+function $(s){return document.querySelector(s);}
+function pad(n){return n<10?'0'+n:''+n;}
+function iso(dt){return dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());}
+function parseISO(s){var p=s.split('-').map(Number);return new Date(p[0],p[1]-1,p[2]);}
+function todayISO(){return S.now||iso(new Date());}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function fmt(n){n=Math.round((+n||0)*100)/100;var c=Math.abs(n%1)>0.004;return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:c?2:0,maximumFractionDigits:2});}
+function parseMoney(s){
+  s=String(s||'').replace(/R\$|\s/g,'');if(!s)return NaN;
+  if(s.indexOf(',')>=0)s=s.replace(/\./g,'').replace(',','.');
+  else if(/^\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,'');
+  var n=Number(s);return isFinite(n)?n:NaN;
+}
+function short(d){var p=d.split('-');return p[2]+'/'+p[1];}
+function dayLabel(d){return DOW[parseISO(d).getDay()]+' '+short(d);}
+function tone(p,has){if(!has)return 'none';if(p>=1)return 'done';if(p>=0.8)return 'ok';if(p>=0.4)return 'mid';return 'low';}
+function pct(p){return Math.round(p*100)+'%';}
+function w100(p){return Math.max(0,Math.min(1,p))*100;}
+function sum(list,f){var t=0;list.forEach(function(s){if(f(s))t+=Number(s.amount)||0;});return t;}
+var toastT=null;
+function toast(m){var t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},4800);}
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+
+/* ---------- cálculo ---------- */
+function workdays(c){
+  var out=[];if(!c||!c.start||!c.days)return out;
+  var dt=parseISO(c.start),g=0;
+  while(out.length<c.days&&g<400){if(dt.getDay()!==0)out.push(iso(dt));dt.setDate(dt.getDate()+1);g++;}
+  return out;
+}
+function ready(c){return !!(c&&c.start&&c.days>0&&(c.goalA>0||c.goalB>0));}
+function defaultDay(wd){
+  var t=todayISO();if(!wd.length)return null;
+  if(t<=wd[0])return wd[0];
+  var last=wd[0];wd.forEach(function(d){if(d<=t)last=d;});return last;
+}
+function sellerOf(name){return S.cfg.sellers.filter(function(s){return s.name===name;})[0];}
+/* meta do dia = (meta da etapa − vendido antes do dia) ÷ dias úteis que restam contando o dia */
+function calc(name,cat,wd,D){
+  var goal=S.cfg[cat.key]||0,i=wd.indexOf(D),n=wd.length;
+  var mine=S.sales.filter(function(s){return s.seller===name&&s.cat===cat.id;});
+  var total=sum(mine,function(){return true;});
+  var before=sum(mine,function(s){return s.date<D;});
+  var day=sum(mine,function(s){return s.date===D;});
+  var restIncl=Math.max(1,n-i),target=Math.max(0,goal-before)/restIncl;
+  var restAfter=n-i-1,upto=before+day;
+  return {goal:goal,total:total,day:day,target:target,faltaDia:Math.max(0,target-day),faltaEtapa:Math.max(0,goal-total),
+    restAfter:restAfter,next:restAfter>0?Math.max(0,goal-upto)/restAfter:null,
+    pDay:target>0?day/target:(goal>0?1:0),pStage:goal?total/goal:0};
+}
+
+/* ---------- acesso aos dados (Google ou demonstração) ---------- */
+var demoDb=null;
+function demoInit(){
+  var t=new Date(),start=iso(t);
+  demoDb={etapa:{start:start,days:9,goalA:20000,goalB:6500,sellers:[{name:'Fábio',goal:true},{name:'Davy',goal:true},{name:'Alice',goal:false}]},sales:[]};
+  var wd=workdays(demoDb.etapa);
+  demoDb.sales.push({id:'d1',date:wd[0],seller:'Fábio',cat:'aparelho',amount:1500},{id:'d2',date:wd[0],seller:'Davy',cat:'aparelho',amount:2600},{id:'d3',date:wd[0],seller:'Fábio',cat:'acessorio',amount:380});
+}
+function demoRespond(b){
+  if(!b)return {ok:true,role:S.code==='gestor'?'gestor':'equipe',etapa:JSON.parse(JSON.stringify(demoDb.etapa)),sales:demoDb.sales.slice(),now:iso(new Date())};
+  if(b.action==='add'){demoDb.sales.push({id:'d'+Date.now(),date:b.date,seller:b.seller,cat:b.cat,amount:b.amount});return {ok:true};}
+  if(b.action==='del'){demoDb.sales=demoDb.sales.filter(function(s){return s.id!==b.id;});return {ok:true};}
+  if(b.action==='setEtapa'){demoDb.etapa=JSON.parse(JSON.stringify(b.etapa));return {ok:true};}
+  return {ok:false,error:'Ação desconhecida.'};
+}
+function call(body){
+  if(S.demo)return Promise.resolve(demoRespond(body));
+  var opt,url=S.api;
+  if(body){body.code=S.code;opt={method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)};}
+  else url=S.api+(S.api.indexOf('?')>=0?'&':'?')+'code='+encodeURIComponent(S.code)+'&t='+Date.now();
+  return fetch(url,opt).then(function(r){return r.json();});
+}
+function load(quiet){
+  if(!quiet){S.loading=true;}
+  return call(null).then(function(r){
+    S.loading=false;
+    if(!r.ok){
+      if(r.error==='codigo'){S.error='';S.loginErr='Código incorreto.';logout(true);return;}
+      S.error=r.error||'Erro ao ler os dados.';render();return;
+    }
+    S.error='';S.role=r.role;S.cfg=r.etapa;S.sales=r.sales||[];S.now=r.now||'';
+    var wd=workdays(S.cfg);if(!S.day||wd.indexOf(S.day)<0)S.day=defaultDay(wd);
+    if(S.role==='equipe'){
+      if(!S.me||!sellerOf(S.me)){S.me=lsGet(LSK+'-me')||'';if(!sellerOf(S.me))S.me='';}
+      S.view=S.me;
+    }else if(!S.view||(S.view!=='team'&&S.view!=='etapa'&&!sellerOf(S.view))){S.view=ready(S.cfg)?'team':'etapa';}
+    render();
+  }).catch(function(){
+    S.loading=false;S.error='Sem conexão com a planilha. Confira a internet e tente de novo.';render();
+  });
+}
+function send(body,okMsg){
+  S.busy=true;render();
+  return call(body).then(function(r){
+    S.busy=false;
+    if(!r.ok){
+      if(r.error==='codigo'){S.loginErr='Código incorreto.';logout(true);return false;}
+      toast(r.error||'Não foi possível salvar.');render();return false;
+    }
+    if(okMsg)toast(okMsg);
+    return load(true).then(function(){return true;});
+  }).catch(function(){S.busy=false;toast('Sem conexão. A venda não foi salva, tente de novo.');render();return false;});
+}
+function logout(keepErr){
+  S.code='';S.role='';S.cfg=null;S.sales=[];S.view='';if(!keepErr)S.loginErr='';
+  lsDel(LSK+'-code');render();
+}
+
+/* ---------- telas ---------- */
+function setupHTML(){
+  return '<div class="card setup login"><h1>Metas da Loja</h1><p class="nogoal">O painel ainda não está ligado à planilha do Google. Siga o LEIA-ME, copie o endereço do App da Web e cole na linha <code>var API_URL = \'\';</code> do arquivo <code>index.html</code>.</p>'+
+    '<button class="btn" id="goDemo" type="button">Ver demonstração</button><p class="small">A demonstração usa dados de exemplo e não grava nada.</p></div>';
+}
+function loginHTML(){
+  return '<form class="card login" id="loginForm" autocomplete="off"><div><p class="eyebrow">Loja · metas por etapa</p><h1>Entrar</h1></div>'+
+    '<label class="fld"><span>Código de acesso</span><input type="password" id="code" autocomplete="current-password" autofocus></label>'+
+    (S.loginErr?'<p class="small err" role="alert">'+esc(S.loginErr)+'</p>':'')+
+    '<button class="btn" type="submit"'+(S.loading?' disabled':'')+'>'+(S.loading?'Entrando…':'Entrar')+'</button>'+
+    (S.demo?'<p class="small">Demonstração: use qualquer código. “gestor” entra como gestor.</p>':'')+'</form>';
+}
+function pickHTML(){
+  return '<div class="card login"><div><p class="eyebrow">Quem é você?</p><h1>Escolha seu nome</h1></div><div class="who">'+
+    S.cfg.sellers.map(function(s){return '<button type="button" data-me="'+esc(s.name)+'">'+esc(s.name)+'</button>';}).join('')+'</div></div>';
+}
+function headHTML(){
+  var title=S.role==='gestor'?'Gestão':(S.me||'Metas');
+  return '<header class="top"><div><p class="eyebrow">Loja · metas por etapa</p><h1>'+esc(title)+'</h1></div><div class="row" style="gap:8px">'+
+    (S.demo?'<span class="pill" data-s="demo">Demonstração</span>':'<span class="pill" data-s="'+(S.error?'err':'ok')+'">'+(S.error?'Sem conexão':'Sincronizado')+'</span>')+
+    '<button type="button" class="pill" id="refresh">Atualizar</button><button type="button" class="pill" id="logout">Sair</button></div></header>'+
+    (S.error?'<p class="banner err">'+esc(S.error)+'</p>':'');
+}
+function stageHTML(wd){
+  var c=S.cfg;
+  if(!ready(c))return '<section class="card"><h2>Etapa ainda não preenchida</h2><p class="nogoal">'+(S.role==='gestor'?'Preencha os dados na aba Etapa.':'Avise o gestor para preencher a etapa. Assim que ele salvar, as metas aparecem aqui.')+'</p></section>';
+  var t=todayISO(),D=S.day,i=wd.indexOf(D);
+  var chips=wd.map(function(d){return '<span class="chip"'+(d===D?' data-now="1"':'')+(d<t?' data-past="1"':'')+' title="'+dayLabel(d)+'">'+d.slice(8)+'</span>';}).join('');
+  return '<section class="card"><div class="row"><span class="lbl">Etapa atual</span><span class="of">'+short(wd[0])+' a '+short(wd[wd.length-1])+'</span></div>'+
+    '<div class="row"><span class="big30">'+c.days+' dias úteis</span><span class="of">dia '+(i+1)+' de '+c.days+' · restam '+(c.days-i)+' contando este</span></div>'+
+    '<div class="chips" aria-label="Dias úteis da etapa">'+chips+'</div>'+
+    '<p class="small">Meta por vendedor: '+(c.goalA?fmt(c.goalA)+' em aparelhos':'sem meta de aparelhos')+' · '+(c.goalB?fmt(c.goalB)+' em acessórios':'sem meta de acessórios')+'</p></section>';
+}
+function tabsHTML(){
+  var out='';
+  if(S.role==='gestor'){
+    out+='<button type="button" class="tab" role="tab" data-v="team" aria-selected="'+(S.view==='team')+'"><b>Equipe</b><span>consolidado</span></button>';
+    S.cfg.sellers.forEach(function(s){
+      var tot=sum(S.sales,function(x){return x.seller===s.name;});
+      out+='<button type="button" class="tab" role="tab" data-v="'+esc(s.name)+'" aria-selected="'+(S.view===s.name)+'"><b>'+esc(s.name)+'</b><span>'+fmt(tot)+'</span></button>';
+    });
+    out+='<button type="button" class="tab" role="tab" data-v="etapa" aria-selected="'+(S.view==='etapa')+'"><b>Etapa</b><span>metas e dias</span></button>';
+  }
+  return out?'<nav class="tabs" role="tablist" aria-label="Seções">'+out+'</nav>':'';
+}
+function dayPick(wd){
+  var t=todayISO();
+  return '<section class="card"><label class="fld"><span>Dia que você está vendo</span><select id="vDay">'+
+    wd.map(function(d){return '<option value="'+d+'"'+(d===S.day?' selected':'')+'>'+dayLabel(d)+(d===t?' (hoje)':'')+'</option>';}).join('')+'</select></label></section>';
+}
+function catHTML(name,cat,wd){
+  var sl=sellerOf(name),c=calc(name,cat,wd,S.day);
+  var h='<article class="card cat"><div class="row"><h2>'+cat.label+'</h2><span class="of">meta da etapa '+(c.goal&&sl.goal?fmt(c.goal):'não definida')+'</span></div>';
+  if(!sl.goal||!c.goal){
+    return h+'<p class="nogoal">'+(sl.goal?'Meta de '+cat.label.toLowerCase()+' ainda não definida.':esc(name)+' está sem meta por enquanto.')+' Vendido na etapa: <b>'+fmt(c.total)+'</b> · no dia: <b>'+fmt(c.day)+'</b>.</p></article>';
+  }
+  var t=tone(c.pDay,true),tS=tone(c.pStage,true),done=c.faltaDia<=0.004;
+  h+='<div class="hoje" data-tone="'+t+'"><span class="lbl">'+(S.day===todayISO()?'Falta hoje':'Falta em '+dayLabel(S.day))+'</span><span class="big"'+(done?' style="font-size:32px"':'')+'>'+(done?'Meta do dia batida':fmt(c.faltaDia))+'</span>'+
+    '<div class="bar"><i style="width:'+w100(c.pDay)+'%"></i></div><span class="sub">Meta do dia '+fmt(c.target)+' · vendido no dia '+fmt(c.day)+'</span></div><div class="facts">';
+  if(c.faltaEtapa<=0.004)h+='<div class="fact" data-tone="done"><b>Etapa batida</b><span>meta da etapa concluída</span></div>';
+  else if(c.restAfter>0)h+='<div class="fact"><b>'+fmt(c.next)+'</b><span>por dia nos '+c.restAfter+' '+(c.restAfter>1?'dias':'dia')+' que restam depois deste</span></div>';
+  else h+='<div class="fact" data-tone="low"><b>'+fmt(c.faltaEtapa)+'</b><span>último dia da etapa: é o que falta</span></div>';
+  h+='<div class="fact" data-tone="'+tS+'"><b>'+fmt(c.faltaEtapa)+'</b><span>falta na etapa · '+pct(c.pStage)+' feito</span></div><div class="fact"><b>'+fmt(c.total)+'</b><span>vendido na etapa</span></div></div>';
+  return h+'<div class="bar" data-tone="'+tS+'" role="img" aria-label="'+pct(c.pStage)+' da meta da etapa"><i style="width:'+w100(c.pStage)+'%"></i></div></article>';
+}
+function entryHTML(name,wd){
+  var mine=S.sales.filter(function(s){return s.seller===name;}).slice().reverse();
+  var log=mine.length?mine.slice(0,40).map(function(s){
+    var cat=CATS.filter(function(x){return x.id===s.cat;})[0];
+    return '<li><div><b>'+fmt(s.amount)+'</b> · '+(cat?cat.one:esc(s.cat))+'<div class="when">'+dayLabel(s.date)+'</div></div><button type="button" class="btn ghost" data-del="'+esc(s.id)+'">Apagar</button></li>';
+  }).join(''):'<li class="empty">Nenhuma venda lançada nesta etapa.</li>';
+  return '<section class="card"><h2>Lançar venda</h2><form class="entry" id="f" autocomplete="off">'+
+    '<div class="fld"><span>Tipo</span><div class="seg" role="radiogroup" aria-label="Tipo de venda"><label><input type="radio" name="cat" value="aparelho" checked><span>Aparelho</span></label><label><input type="radio" name="cat" value="acessorio"><span>Acessório</span></label></div></div>'+
+    '<label class="fld"><span>Dia</span><select id="fDay">'+wd.map(function(d){return '<option value="'+d+'"'+(d===S.day?' selected':'')+'>'+dayLabel(d)+'</option>';}).join('')+'</select></label>'+
+    '<label class="fld"><span>Valor da venda</span><input type="text" id="fAmt" inputmode="decimal" placeholder="1.899,90"></label>'+
+    '<button class="btn" type="submit"'+(S.busy?' disabled':'')+'>'+(S.busy?'Salvando…':'Lançar')+'</button></form>'+
+    '<ul class="plain log">'+log+'</ul></section>';
+}
+function sellerView(name,wd){
+  return dayPick(wd)+'<div class="stack">'+CATS.map(function(c){return catHTML(name,c,wd);}).join('')+'</div>'+entryHTML(name,wd);
+}
+function teamView(wd){
+  var h='<section class="card"><h2>Equipe na etapa</h2><div class="tblwrap"><table><thead><tr><th>Vendedor</th><th>Aparelhos</th><th>Acessórios</th></tr></thead><tbody>';
+  var tot={aparelho:{g:0,s:0},acessorio:{g:0,s:0}};
+  S.cfg.sellers.forEach(function(s){
+    h+='<tr><td>'+esc(s.name)+'</td>'+CATS.map(function(cat){
+      var c=calc(s.name,cat,wd,S.day);tot[cat.id].s+=c.total;
+      if(!s.goal||!c.goal)return '<td>'+(c.total?fmt(c.total):'–')+'</td>';
+      tot[cat.id].g+=c.goal;
+      return '<td data-tone="'+tone(c.pStage,true)+'"><span>'+fmt(c.total)+' de '+fmt(c.goal)+' · '+pct(c.pStage)+'</span></td>';
+    }).join('')+'</tr>';
+  });
+  h+='</tbody><tfoot><tr><td>Total da loja</td>'+CATS.map(function(cat){var t=tot[cat.id];return '<td>'+fmt(t.s)+(t.g?' de '+fmt(t.g)+' · '+pct(t.s/t.g):'')+'</td>';}).join('')+'</tr></tfoot></table></div>'+
+    '<p class="small">A planilha do Google tem o mesmo consolidado, mais o detalhe de cada vendedor por dia.</p></section>';
+  return h;
+}
+function etapaView(){
+  var c=S.cfg;
+  return '<section class="card"><h2>Preencher a etapa</h2><div class="two">'+
+    '<label class="fld"><span>Primeiro dia da etapa</span><input type="date" id="sStart" value="'+esc(c.start||'')+'"></label>'+
+    '<label class="fld"><span>Dias úteis da etapa</span><input type="text" inputmode="numeric" id="sDays" value="'+(c.days||'')+'" placeholder="ex.: 9"></label>'+
+    '<label class="fld"><span>Meta de aparelhos por vendedor</span><input type="text" inputmode="decimal" id="sGoalA" value="'+(c.goalA?String(c.goalA).replace('.',','):'')+'" placeholder="ex.: 20.000"></label>'+
+    '<label class="fld"><span>Meta de acessórios por vendedor</span><input type="text" inputmode="decimal" id="sGoalB" value="'+(c.goalB?String(c.goalB).replace('.',','):'')+'" placeholder="ex.: 6.500"></label></div>'+
+    '<div><p class="small" style="margin-bottom:8px">Quem tem meta nesta etapa</p><div class="checks" id="sellerChecks">'+
+    c.sellers.map(function(s,i){return '<label><input type="checkbox" data-sg="'+i+'"'+(s.goal?' checked':'')+'> '+esc(s.name)+'</label>';}).join('')+'</div></div>'+
+    '<button class="btn" type="button" id="saveEtapa"'+(S.busy?' disabled':'')+'>'+(S.busy?'Salvando…':'Salvar etapa')+'</button>'+
+    '<p class="small">Os dias úteis contam a partir do primeiro dia, pulando os domingos. Em 01/10 com 9 dias úteis, a etapa vai até 10/10. Ao salvar, a planilha refaz o consolidado e as abas de cada vendedor.</p></section>';
+}
+function render(){
+  var app=$('#app'),keep=document.activeElement&&document.activeElement.id,val=keep?document.activeElement.value:null;
+  if(!S.api&&!S.demo){app.innerHTML=setupHTML();bind();return;}
+  if(!S.code||!S.cfg){app.innerHTML=loginHTML();bind();return;}
+  if(S.role==='equipe'&&!S.me){app.innerHTML=pickHTML();bind();return;}
+  var wd=workdays(S.cfg),h=headHTML()+tabsHTML();
+  if(S.role==='gestor'){
+    h+=stageHTML(wd);
+    if(S.view==='etapa')h+=etapaView();
+    else if(!ready(S.cfg))h+=etapaView();
+    else if(S.view==='team')h+=teamView(wd);
+    else h+=sellerView(S.view,wd);
+  }else{
+    h+=stageHTML(wd);
+    if(ready(S.cfg))h+=sellerView(S.me,wd);
+  }
+  h+='<p class="legend"><span data-tone="low"><i></i>Abaixo de 40%</span><span data-tone="mid"><i></i>40% a 79%</span><span data-tone="ok"><i></i>80% a 99%</span><span data-tone="done"><i></i>Meta batida</span></p>';
+  app.innerHTML=h;bind();
+  if(keep&&val!==null){var el=document.getElementById(keep);if(el&&el.tagName==='INPUT'&&el.type!=='radio'&&el.type!=='checkbox'){el.value=val;}}
+}
+
+/* ---------- eventos ---------- */
+var armT=null;
+function bind(){
+  var q=function(s){return document.querySelector(s);};
+  var el;
+  if(el=q('#goDemo'))el.onclick=function(){S.demo=true;demoInit();render();};
+  if(el=q('#loginForm'))el.onsubmit=function(e){
+    e.preventDefault();var c=q('#code').value.trim();if(!c)return;
+    S.code=c;S.loginErr='';S.loading=true;render();
+    load(false).then(function(){if(S.cfg&&S.code)lsSet(LSK+'-code',S.code);});
+  };
+  document.querySelectorAll('[data-me]').forEach(function(b){b.onclick=function(){S.me=b.dataset.me;lsSet(LSK+'-me',S.me);S.view=S.me;render();};});
+  if(el=q('#logout'))el.onclick=function(){if(S.role==='equipe'){S.me='';lsDel(LSK+'-me');}logout(false);};
+  if(el=q('#refresh'))el.onclick=function(){load(false).then(function(){toast('Atualizado.');});};
+  document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){S.view=b.dataset.v;render();};});
+  if(el=q('#vDay'))el.onchange=function(){S.day=el.value;render();};
+  if(el=q('#f'))el.onsubmit=submitSale;
+  document.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){
+    if(b.dataset.arm){clearTimeout(armT);send({action:'del',id:b.dataset.del,seller:currentSeller()},'Lançamento apagado.');return;}
+    b.dataset.arm='1';b.textContent='Confirmar';clearTimeout(armT);armT=setTimeout(function(){delete b.dataset.arm;b.textContent='Apagar';},3500);
+  };});
+  if(el=q('#saveEtapa'))el.onclick=saveEtapa;
+}
+function currentSeller(){return S.role==='gestor'?S.view:S.me;}
+function submitSale(e){
+  e.preventDefault();if(S.busy)return;
+  var amt=parseMoney($('#fAmt').value);
+  if(isNaN(amt)||amt<=0){toast('Digite o valor da venda, por exemplo 1.899,90.');$('#fAmt').focus();return;}
+  var cat=document.querySelector('input[name=cat]:checked').value,date=$('#fDay').value,name=currentSeller();
+  var catObj=CATS.filter(function(c){return c.id===cat;})[0];
+  send({action:'add',seller:name,cat:cat,date:date,amount:Math.round(amt*100)/100},null).then(function(ok){
+    if(!ok)return;
+    S.day=date;render();
+    var wd=workdays(S.cfg),sl=sellerOf(name),c=calc(name,catObj,wd,date),msg='Lançado '+fmt(amt)+' em '+catObj.label.toLowerCase()+'. ';
+    if(sl&&sl.goal&&c.goal){
+      if(c.faltaEtapa<=0.004)msg+='Meta da etapa batida.';
+      else if(c.faltaDia<=0.004)msg+='Meta do dia batida.'+(c.restAfter>0?' Próximo dia: '+fmt(c.next)+'.':'');
+      else msg+='Faltam '+fmt(c.faltaDia)+' hoje.'+(c.restAfter>0?' Próximo dia: '+fmt(c.next)+'.':'');
+    }
+    toast(msg);
+    var f=$('#fAmt');if(f)f.focus();
+  });
+}
+function saveEtapa(){
+  if(S.busy)return;
+  var start=$('#sStart').value,dRaw=$('#sDays').value.trim(),days=dRaw===''?0:parseInt(dRaw,10);
+  var ga=$('#sGoalA').value.trim(),gb=$('#sGoalB').value.trim();
+  var A=ga===''?0:parseMoney(ga),B=gb===''?0:parseMoney(gb);
+  if(!start){toast('Informe o primeiro dia da etapa.');return;}
+  if(isNaN(days)||days<1||days>60){toast('Dias úteis: use um número de 1 a 60.');return;}
+  if(isNaN(A)||isNaN(B)||A<0||B<0){toast('Confira os valores das metas.');return;}
+  var sellers=S.cfg.sellers.map(function(s,i){var cb=document.querySelector('[data-sg="'+i+'"]');return {name:s.name,goal:cb?cb.checked:s.goal};});
+  send({action:'setEtapa',etapa:{start:start,days:days,goalA:A,goalB:B,sellers:sellers}},'Etapa salva.').then(function(ok){if(ok){S.day=null;S.view='team';load(true);}});
+}
+
+/* ---------- início ---------- */
+if(!S.api){render();return;}
+var saved=lsGet(LSK+'-code');
+if(saved){S.code=saved;S.me=lsGet(LSK+'-me')||'';S.loading=true;render();load(false);}
+else render();
+setInterval(function(){if(S.code&&S.cfg&&!S.busy&&!document.hidden)load(true);},60000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&S.code&&S.cfg&&!S.busy)load(true);});
+})();
+</script>
+</body>
+</html>
