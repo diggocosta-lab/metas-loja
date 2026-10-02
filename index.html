@@ -263,7 +263,8 @@ function stagesInfo(D){
   CATS.forEach(function(cat){
     var month=Number(R[cat.key==='goalA'?'monthA':'monthB'])||0,rem=month,tot=0;
     st.forEach(function(x){tot+=Number(x.s[cat.key])||0;});
-    var rest=tot>0?tot:st.length;
+    var unpl=(month>0&&tot>0)?Math.max(0,month-tot):0;   /* parte do mês ainda sem etapa cadastrada */
+    var rest=(tot>0?tot:st.length)+unpl;
     st.forEach(function(x){
       var plan=Number(x.s[cat.key])||0,w=tot>0?plan:1;
       var eff=month>0?(rest>0?rem*w/rest:0):plan;
@@ -296,13 +297,16 @@ function defaultDay(wd){
 function sellerOf(name){return S.cfg.sellers.filter(function(s){return s.name===name;})[0];}
 /* meta do dia = (meta da etapa − vendido antes do dia) ÷ dias úteis que restam contando o dia */
 function calc(name,cat,wd,D){
-  var goal=S.cfg[cat.key]||0,i=wd.indexOf(D),n=wd.length;
+  var goal=S.cfg[cat.key]||0,i=wd.indexOf(D),n=wd.length,t=todayISO();
+  /* dia de referência: para dias futuros vale o ritmo de hoje (não faz sentido contar como zero os dias que ainda não aconteceram) */
+  var R=D;if(D>t){R=wd[0];wd.forEach(function(d){if(d<=t)R=d;});}
+  var iR=wd.indexOf(R);
   var mine=S.sales.filter(function(s){return s.seller===name&&s.cat===cat.id;});
   var total=sum(mine,function(x){return x.date<=D;});
-  var before=sum(mine,function(s){return s.date<D;});
+  var before=sum(mine,function(s){return s.date<R;});
   var day=sum(mine,function(s){return s.date===D;});
-  var restIncl=Math.max(1,n-i),target=Math.max(0,goal-before)/restIncl;
-  var restAfter=n-i-1,upto=before+day;
+  var restIncl=Math.max(1,n-iR),target=Math.max(0,goal-before)/restIncl;
+  var restAfter=n-i-1,upto=before+target*(i-iR)+day;
   return {goal:goal,total:total,day:day,target:target,faltaDia:Math.max(0,target-day),faltaEtapa:Math.max(0,goal-total),
     restAfter:restAfter,next:restAfter>0?Math.max(0,goal-upto)/restAfter:null,
     pDay:target>0?day/target:(goal>0?1:0),pStage:goal?total/goal:0};
