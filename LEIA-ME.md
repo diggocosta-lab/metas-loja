@@ -27,17 +27,16 @@ Painel para Fábio, Davy e Alice lançarem as vendas, com tudo consolidado numa 
 - Novo vendedor: acrescente o nome na aba Etapa da planilha, a partir da linha 6 (coluna A), e salve as metas pelo painel.
 
 ## Meta do mês e etapas
-- Preencha a **meta do mês** (aparelhos e acessórios, da loja toda) e cadastre **todas as etapas** do mês. A meta prevista de cada etapa é da loja toda e é dividida igualmente entre os vendedores com meta.
-- O que não foi vendido em uma etapa é somado e **redistribuído nas etapas seguintes**, na proporção da meta prevista de cada uma. Exemplo: mês 100, etapa 1 prevista 20, vendido 15. Sobram 85 para as etapas que restam, que passam a pesar sobre 85 em vez de 80. Vendeu a mais, as seguintes diminuem.
-- Dentro da etapa vale a mesma ideia, dia a dia: a meta do dia é o que falta da etapa dividido pelos dias que restam, contando o dia.
-- A etapa só entra como encerrada depois do último dia dela. Até lá, vale a meta ajustada.
-- Sem meta do mês, o painel funciona como antes (cada etapa com a sua meta).
+- **Meta do mês** (aparelhos e acessórios, da loja toda): valor de referência que você preenche. Ela não muda a meta das etapas. O painel mostra quanto já foi vendido e quanto falta para ela.
+- **Etapas**: cada uma tem primeiro dia, dias úteis e a meta **por vendedor** (igual para quem tem meta). São valores absolutos, preenchidos por você.
+- **Meta do dia** dentro da etapa: no primeiro dia, meta ÷ dias úteis. Do segundo dia em diante, (meta − vendido até o dia anterior) ÷ dias úteis que restam, contando o dia. Dia que passou sem venda aumenta a meta dos seguintes; dia futuro usa o ritmo de hoje.
+- **Entre etapas**: o que faltou (ou sobrou) numa etapa já encerrada é somado (ou abatido) na meta cadastrada da etapa seguinte. A etapa só conta como encerrada depois do último dia dela.
 
 ## Atualizando o Code.gs (uma vez, ao receber a versão com meta do mês)
 1. No Apps Script, copie as suas duas linhas de código (`CODIGO_EQUIPE` e `CODIGO_GESTOR`) para algum lugar.
 2. Apague tudo, cole o `Code.gs` novo e coloque de volta os seus dois códigos.
 3. **Implantar > Gerenciar implantações > lápis > Versão: Nova versão > Implantar.** O endereço continua o mesmo.
-4. A aba Etapa da planilha é convertida sozinha na primeira vez que o painel carregar (a etapa atual vira a Etapa 1, com a meta da loja = meta por vendedor × vendedores com meta). Depois, abra a aba Etapa do painel, preencha a meta do mês e as demais etapas e salve.
+4. A aba Etapa da planilha é convertida sozinha na primeira vez que o painel carregar (a etapa atual vira a Etapa 1, com a mesma meta por vendedor). Depois, abra a aba Etapa do painel, preencha a meta do mês e as demais etapas e salve.
 
 ## Segurança
 Quem tiver o link e o código da equipe consegue ver e lançar vendas. Troque o código quando alguém sair da equipe (edite no Apps Script e crie uma nova versão da implantação).

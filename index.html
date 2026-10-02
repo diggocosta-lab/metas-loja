@@ -253,31 +253,27 @@ function stageList(R){
   return ((R&&R.stages)||[]).map(function(s){var wd=workdays(s);return {s:s,wd:wd,first:wd[0],last:wd[wd.length-1]};}).filter(function(x){return x.wd.length;});
 }
 function allDays(){return S.info?S.info.stages.reduce(function(a,x){return a.concat(x.wd);},[]):[];}
-/* Meta ajustada de cada etapa: o que falta do mês (meta do mês − vendido nas etapas já encerradas)
-   é repartido nas etapas que restam, na proporção da meta prevista de cada uma.
-   Etapa já encerrada (último dia antes de D) entra com o que foi vendido; etapa em andamento
-   ou futura entra com a própria meta ajustada. Vendeu a mais, as próximas diminuem. */
+/* Cada etapa tem a sua meta, preenchida pelo gestor (valor por vendedor). A meta do mês é só referência.
+   O que sobrou ou faltou numa etapa já encerrada (último dia antes de hoje/do dia visto) é somado na etapa seguinte:
+   meta da etapa = meta cadastrada + (meta da etapa anterior − vendido nela). Vendeu a mais, a seguinte diminui. */
 function stagesInfo(D){
   var ref=D<todayISO()?D:todayISO();
-  var R=S.raw,st=stageList(R),gs=R.sellers.filter(function(x){return x.goal;}).map(function(x){return x.name;}),info={stages:st,month:{}};
+  var R=S.raw,st=stageList(R),gs=R.sellers.filter(function(x){return x.goal;}).map(function(x){return x.name;}),n=gs.length,info={stages:st,month:{}};
   CATS.forEach(function(cat){
-    var month=Number(R[cat.key==='goalA'?'monthA':'monthB'])||0,rem=month,tot=0;
-    st.forEach(function(x){tot+=Number(x.s[cat.key])||0;});
-    var unpl=(month>0&&tot>0)?Math.max(0,month-tot):0;   /* parte do mês ainda sem etapa cadastrada */
-    var rest=(tot>0?tot:st.length)+unpl;
+    var carry=0;
     st.forEach(function(x){
-      var plan=Number(x.s[cat.key])||0,w=tot>0?plan:1;
-      var eff=month>0?(rest>0?rem*w/rest:0):plan;
+      var plan=(Number(x.s[cat.key])||0)*n,raw=plan+carry,eff=Math.max(0,raw);
       var sold=sum(S.all,function(a){return a.cat===cat.id&&gs.indexOf(a.seller)>=0&&a.date>=x.first&&a.date<=x.last;});
       var closed=x.last<ref;
-      x[cat.id]={plan:plan,eff:eff,sold:sold,closed:closed};
-      rest-=w;rem=Math.max(0,rem-(closed?sold:eff));
+      x[cat.id]={plan:plan,eff:eff,sold:sold,closed:closed,carry:carry};
+      carry=closed?(raw-sold):0;
     });
+    var month=Number(R[cat.key==='goalA'?'monthA':'monthB'])||0;
     var soldM=sum(S.all,function(a){return a.cat===cat.id&&gs.indexOf(a.seller)>=0&&a.date<=D;});
     info.month[cat.id]={goal:month,sold:soldM,falta:Math.max(0,month-soldM)};
   });
   info.cur=st.filter(function(x){return x.wd.indexOf(D)>=0;})[0]||st[0];
-  info.n=gs.length;
+  info.n=n;
   return info;
 }
 /* monta a "etapa em vista" (S.cfg) e as vendas dela (S.sales) para o dia escolhido */
@@ -316,10 +312,10 @@ function calc(name,cat,wd,D){
 var demoDb=null;
 function demoInit(){
   var t=new Date(),start=iso(t);
-  var s1={start:start,days:9,goalA:40000,goalB:13000},w1=workdays(s1),d2=parseISO(w1[w1.length-1]);d2.setDate(d2.getDate()+1);
-  var s2={start:iso(d2),days:6,goalA:30000,goalB:7000},w2=workdays(s2),d3=parseISO(w2[w2.length-1]);d3.setDate(d3.getDate()+1);
-  var s3={start:iso(d3),days:6,goalA:24000,goalB:5000},w3=workdays(s3),d4=parseISO(w3[w3.length-1]);d4.setDate(d4.getDate()+1);
-  var s4={start:iso(d4),days:6,goalA:15000,goalB:4000};
+  var s1={start:start,days:9,goalA:20000,goalB:6500},w1=workdays(s1),d2=parseISO(w1[w1.length-1]);d2.setDate(d2.getDate()+1);
+  var s2={start:iso(d2),days:6,goalA:15000,goalB:3500},w2=workdays(s2),d3=parseISO(w2[w2.length-1]);d3.setDate(d3.getDate()+1);
+  var s3={start:iso(d3),days:6,goalA:12000,goalB:2500},w3=workdays(s3),d4=parseISO(w3[w3.length-1]);d4.setDate(d4.getDate()+1);
+  var s4={start:iso(d4),days:6,goalA:7500,goalB:2000};
   demoDb={etapa:{monthA:109000,monthB:29000,stages:[s1,s2,s3,s4],sellers:[{name:'Fábio',goal:true},{name:'Davy',goal:true},{name:'Alice',goal:false}]},sales:[]};
   var wd=w1;
   demoDb.sales.push({id:'d1',date:wd[0],seller:'Fábio',cat:'aparelho',amount:1500},{id:'d2',date:wd[0],seller:'Davy',cat:'aparelho',amount:2600},{id:'d3',date:wd[0],seller:'Fábio',cat:'acessorio',amount:380});
@@ -348,7 +344,7 @@ function load(quiet){
     }
     S.error='';S.role=r.role;S.all=r.sales||[];S.now=r.now||'';
     var et=r.etapa;S.legacy=!et.stages;
-    if(S.legacy){var ng=et.sellers.filter(function(x){return x.goal;}).length;et={monthA:0,monthB:0,sellers:et.sellers,stages:et.start?[{start:et.start,days:et.days,goalA:(et.goalA||0)*ng,goalB:(et.goalB||0)*ng}]:[]};}
+    if(S.legacy){var ng=et.sellers.filter(function(x){return x.goal;}).length;et={monthA:0,monthB:0,sellers:et.sellers,stages:et.start?[{start:et.start,days:et.days,goalA:et.goalA||0,goalB:et.goalB||0}]:[]};}
     S.raw=et;S.info=stagesInfo(S.day||'');
     var wd=allDays();if(!S.day||wd.indexOf(S.day)<0)S.day=defaultDay(wd);
     applyDay();
@@ -414,10 +410,10 @@ function stageHTML(wd){
 function adjNote(){
   var cur=S.info.cur,n=S.info.n||1,out=[];
   CATS.forEach(function(cat){
-    var o=cur[cat.id],m=S.info.month[cat.id];
-    if(m.goal>0&&Math.abs(o.eff-o.plan)>0.5)out.push(cat.label.toLowerCase()+': prevista '+fmt(o.plan/n)+' → ajustada '+fmt(o.eff/n)+' por vendedor');
+    var o=cur[cat.id];
+    if(Math.abs(o.eff-o.plan)>0.5)out.push(cat.label.toLowerCase()+': cadastrada '+fmt(o.plan/n)+' '+(o.eff>o.plan?'+ ':'− ')+fmt(Math.abs(o.eff-o.plan)/n)+' da etapa anterior = '+fmt(o.eff/n));
   });
-  return out.length?'<p class="small">Ajustada pela meta do mês ('+out.join(' · ')+').</p>':'';
+  return out.length?'<p class="small">Por vendedor, com o que ficou da etapa anterior ('+out.join(' · ')+').</p>':'';
 }
 function tabsHTML(){
   var out='';
@@ -559,10 +555,10 @@ function monthHTML(){
     out+='<p class="small" style="margin-top:14px"><b>'+c.label+' por etapa</b></p><ul class="plain dlist">'+info.stages.map(function(x,k){
       var o=x[c.id],p=o.eff>0?o.sold/o.eff:(o.closed?1:0),cur=x===info.cur;
       return '<li class="drow" data-tone="'+tone(p,o.eff>0)+'"><div class="who2"><b>Etapa '+(k+1)+(cur?' · em vista':'')+'</b><span class="of">'+short(x.first)+' a '+short(x.last)+'</span></div><div class="bar"><i style="width:'+w100(p)+'%"></i></div>'+
-        '<div class="row"><span class="of">'+fmt(o.sold)+' de <b>'+fmt(o.eff)+'</b>'+(Math.abs(o.eff-o.plan)>0.5?' · prevista '+fmt(o.plan):'')+'</span><span class="of">'+(o.eff>0?pct(p):'')+'</span></div></li>';
+        '<div class="row"><span class="of">'+fmt(o.sold)+' de <b>'+fmt(o.eff)+'</b>'+(Math.abs(o.eff-o.plan)>0.5?' · cadastrada '+fmt(o.plan):'')+'</span><span class="of">'+(o.eff>0?pct(p):'')+'</span></div></li>';
     }).join('')+'</ul>';
   });
-  return out+'<p class="small">O que não foi vendido em uma etapa é somado e redistribuído nas etapas seguintes, na proporção da meta prevista de cada uma. Vendeu a mais, as próximas diminuem. O mesmo vale dentro da etapa, dia a dia.</p></section>';
+  return out+'<p class="small">A meta do mês é a referência. Cada etapa tem a meta cadastrada pelo gestor, e o que faltou (ou sobrou) numa etapa encerrada é somado (ou abatido) na etapa seguinte. O mesmo vale dentro da etapa, dia a dia.</p></section>';
 }
 function dashView(wd){
   var D=S.day,t=todayISO(),i=wd.indexOf(D);
@@ -616,28 +612,29 @@ function readDraft(){
 }
 function mny(v){v=String(v||'').trim();return v===''?0:parseMoney(v);}
 function updateChk(){
-  var d=readDraft(),tA=0,tB=0;
+  var d=readDraft(),tA=0,tB=0,ng=d.sellers.filter(function(x){return x.goal;}).length;
   document.querySelectorAll('.stg').forEach(function(b,i){
     var st=d.stages[i],ws=workdays({start:st.start,days:parseInt(st.days,10)||0});
-    b.querySelector('.stgEnd').textContent=ws.length?'Vai de '+short(ws[0])+' a '+short(ws[ws.length-1])+' ('+ws.length+' dias úteis, sem domingos).':'';
-    tA+=mny(st.goalA)||0;tB+=mny(st.goalB)||0;
+    var a=mny(st.goalA)||0,c=mny(st.goalB)||0;
+    b.querySelector('.stgEnd').textContent=(ws.length?'Vai de '+short(ws[0])+' a '+short(ws[ws.length-1])+' ('+ws.length+' dias úteis, sem domingos). ':'')+(ng&&(a||c)?'Loja: '+fmt(a*ng)+' em aparelhos · '+fmt(c*ng)+' em acessórios.':'');
+    tA+=a*ng;tB+=c*ng;
   });
   var mA=mny(d.monthA)||0,mB=mny(d.monthB)||0,el=document.getElementById('sumChk');
-  if(el)el.textContent='Soma das etapas: aparelhos '+fmt(tA)+(mA?' de '+fmt(mA)+' do mês':'')+' · acessórios '+fmt(tB)+(mB?' de '+fmt(mB)+' do mês':'')+'. As metas previstas das etapas funcionam como pesos: o app ajusta cada uma para fechar a meta do mês.';
+  if(el)el.textContent='Soma das etapas (loja): aparelhos '+fmt(tA)+(mA?' de '+fmt(mA)+' do mês':'')+' · acessórios '+fmt(tB)+(mB?' de '+fmt(mB)+' do mês':'')+'.';
 }
 function etapaView(){
   var d=S.draft||(S.draft=draftFromRaw());
   return (S.legacy?'<p class="banner err">A planilha ainda está na versão antiga do Code.gs. Cole o Code.gs novo no Apps Script e publique uma nova versão (veja o LEIA-ME) para salvar metas do mês e várias etapas.</p>':'')+
-    '<section class="card"><h2>Meta do mês</h2><p class="small">Valor da loja toda. Deixe em branco se não quiser usar a meta do mês.</p><div class="two">'+
+    '<section class="card"><h2>Meta do mês</h2><p class="small">Valor de referência da loja toda. Não muda as metas das etapas.</p><div class="two">'+
     '<label class="fld"><span>Meta do mês · aparelhos</span><input type="text" inputmode="decimal" id="mA" value="'+esc(d.monthA)+'" placeholder="ex.: 109.000"></label>'+
     '<label class="fld"><span>Meta do mês · acessórios</span><input type="text" inputmode="decimal" id="mB" value="'+esc(d.monthB)+'" placeholder="ex.: 29.000"></label></div></section>'+
-    '<section class="card" id="stagesBox"><h2>Etapas do mês</h2><p class="small">Cadastre todas as etapas. A meta prevista é da loja toda e é dividida igualmente entre os vendedores com meta.</p>'+
+    '<section class="card" id="stagesBox"><h2>Etapas do mês</h2><p class="small">Cadastre as etapas do mês. A meta da etapa é <b>por vendedor</b> (igual para quem tem meta). O que faltar numa etapa encerrada soma na etapa seguinte.</p>'+
     d.stages.map(function(x,i){
       return '<div class="stg"><div class="row"><b>Etapa '+(i+1)+'</b>'+(d.stages.length>1?'<button type="button" class="btn ghost" data-rmst="'+i+'">Remover</button>':'')+'</div><div class="two">'+
         '<label class="fld"><span>Primeiro dia</span><input type="date" class="sStart" value="'+esc(x.start)+'"></label>'+
         '<label class="fld"><span>Dias úteis</span><input type="text" inputmode="numeric" class="sDays" value="'+esc(x.days)+'" placeholder="ex.: 9"></label>'+
-        '<label class="fld"><span>Meta prevista · aparelhos</span><input type="text" inputmode="decimal" class="sGoalA" value="'+esc(x.goalA)+'" placeholder="ex.: 40.000"></label>'+
-        '<label class="fld"><span>Meta prevista · acessórios</span><input type="text" inputmode="decimal" class="sGoalB" value="'+esc(x.goalB)+'" placeholder="ex.: 13.000"></label></div><p class="small stgEnd"></p></div>';
+        '<label class="fld"><span>Meta por vendedor · aparelhos</span><input type="text" inputmode="decimal" class="sGoalA" value="'+esc(x.goalA)+'" placeholder="ex.: 40.000"></label>'+
+        '<label class="fld"><span>Meta por vendedor · acessórios</span><input type="text" inputmode="decimal" class="sGoalB" value="'+esc(x.goalB)+'" placeholder="ex.: 13.000"></label></div><p class="small stgEnd"></p></div>';
     }).join('')+
     '<button type="button" class="btn ghost" id="addStage">＋ Adicionar etapa</button><p class="small" id="sumChk"></p></section>'+
     '<section class="card"><p class="small" style="margin-bottom:8px">Quem tem meta</p><div class="checks" id="sellerChecks">'+
@@ -699,7 +696,7 @@ function bind(){
     d.stages.push({start:nx,days:'6',goalA:'',goalB:''});S.draft=d;render(true);
   };
   document.querySelectorAll('[data-rmst]').forEach(function(b){b.onclick=function(){var d=readDraft();d.stages.splice(+b.dataset.rmst,1);S.draft=d;render(true);};});
-  if(el=q('#stagesBox')){document.querySelectorAll('#mA,#mB,#stagesBox input').forEach(function(i){i.oninput=updateChk;});updateChk();}
+  if(el=q('#stagesBox')){document.querySelectorAll('#mA,#mB,#stagesBox input,#sellerChecks input').forEach(function(i){i.oninput=updateChk;i.onchange=updateChk;});updateChk();}
 }
 function currentSeller(){return S.role==='gestor'?S.view:S.me;}
 function submitQuick(e){
