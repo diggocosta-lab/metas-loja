@@ -9,7 +9,7 @@ Painel para Fábio, Davy e Alice lançarem as vendas, com tudo consolidado numa 
 ## Parte 1: a planilha (10 minutos, uma vez só)
 1. No Google Drive, crie uma planilha nova (nome sugerido: Metas da Loja).
 2. Menu **Extensões > Apps Script**. Apague o conteúdo e cole o `Code.gs` inteiro.
-3. Nas duas primeiras linhas de código, troque `CODIGO_EQUIPE` (código dos vendedores) e `CODIGO_GESTOR` (só seu).
+3. Na lista `USUARIOS` do código, troque o código de cada pessoa (cada um tem o seu).
 4. Na barra de cima, escolha a função **setup** e clique em **Executar**. Autorize quando o Google pedir (aparece "app não verificado": Avançado > Acessar). Isso cria as abas Consolidado, Fábio, Davy, Alice, Vendas e Etapa.
 5. **Implantar > Nova implantação > App da Web**. Em "Executar como" deixe **Eu**; em "Quem tem acesso" escolha **Qualquer pessoa**. Implante e copie o endereço que termina em `/exec`.
 
@@ -28,15 +28,22 @@ Painel para Fábio, Davy e Alice lançarem as vendas, com tudo consolidado numa 
 
 ## Meta do mês e etapas
 - **Meta do mês** (aparelhos e acessórios, da loja toda): valor de referência que você preenche. Ela não muda a meta das etapas. O painel mostra quanto já foi vendido e quanto falta para ela.
-- **Etapas**: cada uma tem primeiro dia, dias úteis e a meta **por vendedor** (igual para quem tem meta). São valores absolutos, preenchidos por você.
+- **Etapas**: cada uma tem primeiro dia, dias úteis e a meta da **loja**, preenchida por você. O painel divide igualmente entre os vendedores com meta (20.000 com Fábio e Davy = 10.000 cada).
 - **Meta do dia** dentro da etapa: no primeiro dia, meta ÷ dias úteis. Do segundo dia em diante, (meta − vendido até o dia anterior) ÷ dias úteis que restam, contando o dia. Dia que passou sem venda aumenta a meta dos seguintes; dia futuro usa o ritmo de hoje.
 - **Entre etapas**: o que faltou (ou sobrou) numa etapa já encerrada é somado (ou abatido) na meta cadastrada da etapa seguinte. A etapa só conta como encerrada depois do último dia dela.
 
 ## Atualizando o Code.gs (uma vez, ao receber a versão com meta do mês)
-1. No Apps Script, copie as suas duas linhas de código (`CODIGO_EQUIPE` e `CODIGO_GESTOR`) para algum lugar.
-2. Apague tudo, cole o `Code.gs` novo e coloque de volta os seus dois códigos.
+1. No Apps Script, apague tudo e cole o `Code.gs` novo.
+2. Na lista `USUARIOS`, troque os códigos de cada pessoa.
 3. **Implantar > Gerenciar implantações > lápis > Versão: Nova versão > Implantar.** O endereço continua o mesmo.
 4. A aba Etapa da planilha é convertida sozinha na primeira vez que o painel carregar (a etapa atual vira a Etapa 1, com a mesma meta por vendedor). Depois, abra a aba Etapa do painel, preencha a meta do mês e as demais etapas e salve.
 
+## Acessos
+Cada pessoa entra com o seu código (lista `USUARIOS` no `Code.gs`):
+- **gestor** (você): vê tudo e preenche a meta do mês e as etapas.
+- **total** (Fábio): vê tudo (resumo da loja, meta do mês, todos os vendedores) e lança por qualquer vendedor, mas não muda as metas.
+- **vendedor** (Davy, Alice): vê só a própria meta da etapa e os próprios lançamentos. O servidor não envia a meta do mês, as outras etapas nem as vendas dos colegas.
+Para trocar um código ou incluir alguém, edite a lista, salve e publique uma nova versão.
+
 ## Segurança
-Quem tiver o link e o código da equipe consegue ver e lançar vendas. Troque o código quando alguém sair da equipe (edite no Apps Script e crie uma nova versão da implantação).
+Quem tiver o link e um código entra com o papel daquele código. Troque o código quando alguém sair da equipe (edite no Apps Script e crie uma nova versão da implantação).

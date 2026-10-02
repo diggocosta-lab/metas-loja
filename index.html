@@ -213,7 +213,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycby0rr5kD7_1sZEI3fVIo9Sakb
 var DOW=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 var CATS=[{id:'aparelho',label:'Aparelhos',one:'Aparelho',key:'goalA'},{id:'acessorio',label:'Acessórios',one:'Acessório',key:'goalB'}];
 var LSK='metas-loja-v1';
-var S={api:API_URL,demo:false,code:'',role:'',me:'',view:'',day:null,cfg:null,sales:[],now:'',loading:false,error:'',busy:false,loginErr:'',dash:'pizza',anim:false,quick:'',raw:null,all:[],info:null,draft:null,legacy:false};
+var S={api:API_URL,demo:false,code:'',role:'',me:'',view:'',day:null,cfg:null,sales:[],now:'',loading:false,error:'',busy:false,loginErr:'',dash:'pizza',anim:false,quick:'',full:false,raw:null,all:[],info:null,draft:null,legacy:false};
 
 function $(s){return document.querySelector(s);}
 function pad(n){return n<10?'0'+n:''+n;}
@@ -262,7 +262,7 @@ function stagesInfo(D){
   CATS.forEach(function(cat){
     var carry=0;
     st.forEach(function(x){
-      var plan=(Number(x.s[cat.key])||0)*n,raw=plan+carry,eff=Math.max(0,raw);
+      var plan=Number(x.s[cat.key])||0,raw=plan+carry,eff=Math.max(0,raw);
       var sold=sum(S.all,function(a){return a.cat===cat.id&&gs.indexOf(a.seller)>=0&&a.date>=x.first&&a.date<=x.last;});
       var closed=x.last<ref;
       x[cat.id]={plan:plan,eff:eff,sold:sold,closed:closed,carry:carry};
@@ -312,16 +312,25 @@ function calc(name,cat,wd,D){
 var demoDb=null;
 function demoInit(){
   var t=new Date(),start=iso(t);
-  var s1={start:start,days:9,goalA:20000,goalB:6500},w1=workdays(s1),d2=parseISO(w1[w1.length-1]);d2.setDate(d2.getDate()+1);
-  var s2={start:iso(d2),days:6,goalA:15000,goalB:3500},w2=workdays(s2),d3=parseISO(w2[w2.length-1]);d3.setDate(d3.getDate()+1);
-  var s3={start:iso(d3),days:6,goalA:12000,goalB:2500},w3=workdays(s3),d4=parseISO(w3[w3.length-1]);d4.setDate(d4.getDate()+1);
-  var s4={start:iso(d4),days:6,goalA:7500,goalB:2000};
+  var s1={start:start,days:9,goalA:40000,goalB:13000},w1=workdays(s1),d2=parseISO(w1[w1.length-1]);d2.setDate(d2.getDate()+1);
+  var s2={start:iso(d2),days:6,goalA:30000,goalB:7000},w2=workdays(s2),d3=parseISO(w2[w2.length-1]);d3.setDate(d3.getDate()+1);
+  var s3={start:iso(d3),days:6,goalA:24000,goalB:5000},w3=workdays(s3),d4=parseISO(w3[w3.length-1]);d4.setDate(d4.getDate()+1);
+  var s4={start:iso(d4),days:6,goalA:15000,goalB:4000};
   demoDb={etapa:{monthA:109000,monthB:29000,stages:[s1,s2,s3,s4],sellers:[{name:'Fábio',goal:true},{name:'Davy',goal:true},{name:'Alice',goal:false}]},sales:[]};
   var wd=w1;
   demoDb.sales.push({id:'d1',date:wd[0],seller:'Fábio',cat:'aparelho',amount:1500},{id:'d2',date:wd[0],seller:'Davy',cat:'aparelho',amount:2600},{id:'d3',date:wd[0],seller:'Fábio',cat:'acessorio',amount:380});
 }
 function demoRespond(b){
-  if(!b)return {ok:true,role:S.code==='gestor'?'gestor':'equipe',etapa:JSON.parse(JSON.stringify(demoDb.etapa)),sales:demoDb.sales.slice(),now:iso(new Date())};
+  if(!b){
+    var c=S.code,E=JSON.parse(JSON.stringify(demoDb.etapa)),now=iso(new Date());
+    if(c==='gestor')return {ok:true,role:'gestor',me:'',etapa:E,sales:demoDb.sales.slice(),now:now};
+    if(c==='fabio')return {ok:true,role:'total',me:'Fábio',etapa:E,sales:demoDb.sales.slice(),now:now};
+    if(c==='davy'||c==='alice'){
+      var nm=c==='davy'?'Davy':'Alice',me=E.sellers.filter(function(x){return x.name===nm;})[0],ng=E.sellers.filter(function(x){return x.goal;}).length||1,st=E.stages[0];
+      return {ok:true,role:'vendedor',me:nm,etapa:{monthA:0,monthB:0,sellers:[{name:nm,goal:me.goal}],stages:[{start:st.start,days:st.days,goalA:st.goalA/ng,goalB:st.goalB/ng}]},sales:demoDb.sales.filter(function(x){return x.seller===nm;}),now:now};
+    }
+    return {ok:true,role:'equipe',etapa:E,sales:demoDb.sales.slice(),now:now};
+  }
   if(b.action==='add'){demoDb.sales.push({id:'d'+Date.now(),date:b.date,seller:b.seller,cat:b.cat,amount:b.amount});return {ok:true};}
   if(b.action==='del'){demoDb.sales=demoDb.sales.filter(function(s){return s.id!==b.id;});return {ok:true};}
   if(b.action==='setEtapa'){demoDb.etapa=JSON.parse(JSON.stringify(b.etapa));return {ok:true};}
@@ -342,16 +351,17 @@ function load(quiet){
       if(r.error==='codigo'){S.error='';S.loginErr='Código incorreto.';logout(true);return;}
       S.error=r.error||'Erro ao ler os dados.';render();return;
     }
-    S.error='';S.role=r.role;S.all=r.sales||[];S.now=r.now||'';
+    S.error='';S.role=r.role;S.full=(r.role==='gestor'||r.role==='total');S.all=r.sales||[];S.now=r.now||'';if(r.me)S.me=r.me;
     var et=r.etapa;S.legacy=!et.stages;
-    if(S.legacy){var ng=et.sellers.filter(function(x){return x.goal;}).length;et={monthA:0,monthB:0,sellers:et.sellers,stages:et.start?[{start:et.start,days:et.days,goalA:et.goalA||0,goalB:et.goalB||0}]:[]};}
+    if(S.legacy){var ng=et.sellers.filter(function(x){return x.goal;}).length;et={monthA:0,monthB:0,sellers:et.sellers,stages:et.start?[{start:et.start,days:et.days,goalA:(et.goalA||0)*ng,goalB:(et.goalB||0)*ng}]:[]};}
     S.raw=et;S.info=stagesInfo(S.day||'');
     var wd=allDays();if(!S.day||wd.indexOf(S.day)<0)S.day=defaultDay(wd);
     applyDay();
-    if(S.role==='equipe'){
+    if(S.role==='vendedor'){S.view=S.me;}
+    else if(S.role==='equipe'){
       if(!S.me||!sellerOf(S.me)){S.me=lsGet(LSK+'-me')||'';if(!sellerOf(S.me))S.me='';}
       if(S.view!=='team'&&S.view!==S.me)S.view=ready(S.cfg)?'team':S.me;
-    }else if(!S.view||(S.view!=='team'&&S.view!=='etapa'&&!sellerOf(S.view))){S.view=ready(S.cfg)?'team':'etapa';}
+    }else if(!S.view||(S.view!=='team'&&S.view!=='etapa'&&!sellerOf(S.view))||(S.view==='etapa'&&S.role!=='gestor')){S.view=ready(S.cfg)||S.role!=='gestor'?'team':'etapa';}
     render();
   }).catch(function(){
     S.loading=false;S.error='Sem conexão com a planilha. Confira a internet e tente de novo.';render();
@@ -384,14 +394,14 @@ function loginHTML(){
     '<label class="fld"><span>Código de acesso</span><input type="password" id="code" autocomplete="current-password" autofocus></label>'+
     (S.loginErr?'<p class="small err" role="alert">'+esc(S.loginErr)+'</p>':'')+
     '<button class="btn" type="submit"'+(S.loading?' disabled':'')+'>'+(S.loading?'Entrando…':'Entrar')+'</button>'+
-    (S.demo?'<p class="small">Demonstração: use qualquer código. “gestor” entra como gestor.</p>':'')+'</form>';
+    (S.demo?'<p class="small">Demonstração: digite gestor, fabio, davy ou alice.</p>':'')+'</form>';
 }
 function pickHTML(){
   return '<div class="card login"><div><p class="eyebrow">Quem é você?</p><h1>Escolha seu nome</h1></div><div class="who">'+
     S.cfg.sellers.map(function(s){return '<button type="button" data-me="'+esc(s.name)+'">'+esc(s.name)+'</button>';}).join('')+'</div></div>';
 }
 function headHTML(){
-  var title=S.role==='gestor'?'Gestão':(S.view==='team'?'Resumo':(S.me||'Metas'));
+  var title=S.full?'Gestão':S.role==='vendedor'?(S.me||'Metas'):(S.view==='team'?'Resumo':(S.me||'Metas'));
   return '<header class="top"><div><p class="eyebrow">Loja · metas por etapa</p><h1>'+esc(title)+'</h1></div><div class="row" style="gap:8px">'+
     (S.demo?'<span class="pill" data-s="demo">Demonstração</span>':'<span class="pill" data-s="'+(S.error?'err':'ok')+'">'+(S.error?'Sem conexão':'Sincronizado')+'</span>')+
     '<button type="button" class="pill" id="refresh">Atualizar</button><button type="button" class="pill" id="logout">Sair</button></div></header>'+
@@ -421,13 +431,13 @@ function tabsHTML(){
     out+='<button type="button" class="tab" role="tab" data-v="team" aria-selected="'+(S.view==='team')+'"><b>Resumo</b><span>loja toda</span></button>'+
       '<button type="button" class="tab" role="tab" data-v="'+esc(S.me)+'" aria-selected="'+(S.view===S.me)+'"><b>'+esc(S.me)+'</b><span>meu painel e lançar</span></button>';
   }
-  if(S.role==='gestor'){
+  if(S.full){
     out+='<button type="button" class="tab" role="tab" data-v="team" aria-selected="'+(S.view==='team')+'"><b>Resumo</b><span>loja toda</span></button>';
     S.cfg.sellers.forEach(function(s){
       var tot=sum(S.all,function(x){return x.seller===s.name;});
       out+='<button type="button" class="tab" role="tab" data-v="'+esc(s.name)+'" aria-selected="'+(S.view===s.name)+'"><b>'+esc(s.name)+'</b><span>'+fmt(tot)+'</span></button>';
     });
-    out+='<button type="button" class="tab" role="tab" data-v="etapa" aria-selected="'+(S.view==='etapa')+'"><b>Etapa</b><span>metas e dias</span></button>';
+    if(S.role==='gestor')out+='<button type="button" class="tab" role="tab" data-v="etapa" aria-selected="'+(S.view==='etapa')+'"><b>Etapa</b><span>metas e dias</span></button>';
   }
   return out?'<nav class="tabs" role="tablist" aria-label="Seções">'+out+'</nav>':'';
 }
@@ -581,9 +591,9 @@ function dashView(wd){
     var hd='<article class="card cat"><div class="row"><h2>'+cat.label+'</h2><span class="of">meta da loja '+(g?fmt(g):'não definida')+'</span></div>';
     if(!g)return hd+'<p class="nogoal">Sem meta de '+cat.label.toLowerCase()+' nesta etapa.</p></article>';
     if(S.dash==='pizza'){
-      return hd+'<div class="bigdonut" data-tone="'+tt+'">'+donutSVG(p,tt,'da meta da loja',170)+'<button type="button" class="bigcap qtap" data-quick="d|'+cat.id+'" aria-expanded="'+(S.quick==='d|'+cat.id)+'"><span class="lbl">Falta para a meta da loja</span><span class="bnum">'+(falta<=0.004?'Meta batida':fmt(falta))+'</span><span class="of">Vendido '+fmt(sold)+' de '+fmt(g)+'</span><span class="qcta">'+(S.quick==='d|'+cat.id?'Fechar':'＋ Toque para lançar '+cat.one)+'</span></button></div>'+quickHTML(cat,S.role==='gestor'?'':S.me,'d|'+cat.id)+
+      return hd+'<div class="bigdonut" data-tone="'+tt+'">'+donutSVG(p,tt,'da meta da loja',170)+'<button type="button" class="bigcap qtap" data-quick="d|'+cat.id+'" aria-expanded="'+(S.quick==='d|'+cat.id)+'"><span class="lbl">Falta para a meta da loja</span><span class="bnum">'+(falta<=0.004?'Meta batida':fmt(falta))+'</span><span class="of">Vendido '+fmt(sold)+' de '+fmt(g)+'</span><span class="qcta">'+(S.quick==='d|'+cat.id?'Fechar':'＋ Toque para lançar '+cat.one)+'</span></button></div>'+quickHTML(cat,S.full?'':S.me,'d|'+cat.id)+
         '<div class="facts"><div class="fact"><b>'+fmt(day)+'</b><span>vendido em '+dayLabel(D)+'</span></div><div class="fact"><b>'+(wd.length-i)+' '+((wd.length-i)>1?'dias':'dia')+'</b><span>restam, contando este</span></div></div>'+
-        '<div class="donuts">'+sls.map(function(o){return donutBlock(o.c.pStage,tone(o.c.pStage,true),'',100,fmt(o.c.total)+' de '+fmt(o.c.goal),o.c.faltaEtapa>0.004?'falta '+fmt(o.c.faltaEtapa)+(o.c.faltaDia>0.004?' · hoje '+fmt(o.c.faltaDia):''):'meta batida',o.name,(S.role==='gestor'||o.name===S.me)?'v|'+cat.id+'|'+o.name:'',cat.one);}).join('')+'</div>'+
+        '<div class="donuts">'+sls.map(function(o){return donutBlock(o.c.pStage,tone(o.c.pStage,true),'',100,fmt(o.c.total)+' de '+fmt(o.c.goal),o.c.faltaEtapa>0.004?'falta '+fmt(o.c.faltaEtapa)+(o.c.faltaDia>0.004?' · hoje '+fmt(o.c.faltaDia):''):'meta batida',o.name,(S.full||o.name===S.me)?'v|'+cat.id+'|'+o.name:'',cat.one);}).join('')+'</div>'+
         sls.map(function(o){var k='v|'+cat.id+'|'+o.name;return quickHTML(cat,o.name,k);}).join('')+
         (extra>0?'<p class="small">Fora da meta (vendedores sem meta): '+fmt(extra)+'.</p>':'')+'</article>';
     }
@@ -616,8 +626,8 @@ function updateChk(){
   document.querySelectorAll('.stg').forEach(function(b,i){
     var st=d.stages[i],ws=workdays({start:st.start,days:parseInt(st.days,10)||0});
     var a=mny(st.goalA)||0,c=mny(st.goalB)||0;
-    b.querySelector('.stgEnd').textContent=(ws.length?'Vai de '+short(ws[0])+' a '+short(ws[ws.length-1])+' ('+ws.length+' dias úteis, sem domingos). ':'')+(ng&&(a||c)?'Loja: '+fmt(a*ng)+' em aparelhos · '+fmt(c*ng)+' em acessórios.':'');
-    tA+=a*ng;tB+=c*ng;
+    b.querySelector('.stgEnd').textContent=(ws.length?'Vai de '+short(ws[0])+' a '+short(ws[ws.length-1])+' ('+ws.length+' dias úteis, sem domingos). ':'')+(ng&&(a||c)?'Por vendedor ('+ng+' com meta): '+fmt(a/ng)+' em aparelhos · '+fmt(c/ng)+' em acessórios.':'');
+    tA+=a;tB+=c;
   });
   var mA=mny(d.monthA)||0,mB=mny(d.monthB)||0,el=document.getElementById('sumChk');
   if(el)el.textContent='Soma das etapas (loja): aparelhos '+fmt(tA)+(mA?' de '+fmt(mA)+' do mês':'')+' · acessórios '+fmt(tB)+(mB?' de '+fmt(mB)+' do mês':'')+'.';
@@ -628,13 +638,13 @@ function etapaView(){
     '<section class="card"><h2>Meta do mês</h2><p class="small">Valor de referência da loja toda. Não muda as metas das etapas.</p><div class="two">'+
     '<label class="fld"><span>Meta do mês · aparelhos</span><input type="text" inputmode="decimal" id="mA" value="'+esc(d.monthA)+'" placeholder="ex.: 109.000"></label>'+
     '<label class="fld"><span>Meta do mês · acessórios</span><input type="text" inputmode="decimal" id="mB" value="'+esc(d.monthB)+'" placeholder="ex.: 29.000"></label></div></section>'+
-    '<section class="card" id="stagesBox"><h2>Etapas do mês</h2><p class="small">Cadastre as etapas do mês. A meta da etapa é <b>por vendedor</b> (igual para quem tem meta). O que faltar numa etapa encerrada soma na etapa seguinte.</p>'+
+    '<section class="card" id="stagesBox"><h2>Etapas do mês</h2><p class="small">Cadastre as etapas do mês. A meta da etapa é da <b>loja</b> e é dividida igualmente entre os vendedores com meta. O que faltar numa etapa encerrada soma na etapa seguinte.</p>'+
     d.stages.map(function(x,i){
       return '<div class="stg"><div class="row"><b>Etapa '+(i+1)+'</b>'+(d.stages.length>1?'<button type="button" class="btn ghost" data-rmst="'+i+'">Remover</button>':'')+'</div><div class="two">'+
         '<label class="fld"><span>Primeiro dia</span><input type="date" class="sStart" value="'+esc(x.start)+'"></label>'+
         '<label class="fld"><span>Dias úteis</span><input type="text" inputmode="numeric" class="sDays" value="'+esc(x.days)+'" placeholder="ex.: 9"></label>'+
-        '<label class="fld"><span>Meta por vendedor · aparelhos</span><input type="text" inputmode="decimal" class="sGoalA" value="'+esc(x.goalA)+'" placeholder="ex.: 40.000"></label>'+
-        '<label class="fld"><span>Meta por vendedor · acessórios</span><input type="text" inputmode="decimal" class="sGoalB" value="'+esc(x.goalB)+'" placeholder="ex.: 13.000"></label></div><p class="small stgEnd"></p></div>';
+        '<label class="fld"><span>Meta da etapa · aparelhos (loja)</span><input type="text" inputmode="decimal" class="sGoalA" value="'+esc(x.goalA)+'" placeholder="ex.: 40.000"></label>'+
+        '<label class="fld"><span>Meta da etapa · acessórios (loja)</span><input type="text" inputmode="decimal" class="sGoalB" value="'+esc(x.goalB)+'" placeholder="ex.: 13.000"></label></div><p class="small stgEnd"></p></div>';
     }).join('')+
     '<button type="button" class="btn ghost" id="addStage">＋ Adicionar etapa</button><p class="small" id="sumChk"></p></section>'+
     '<section class="card"><p class="small" style="margin-bottom:8px">Quem tem meta</p><div class="checks" id="sellerChecks">'+
@@ -649,12 +659,15 @@ function render(skip){
   if(!S.code||!S.cfg){app.innerHTML=loginHTML();bind();return;}
   if(S.role==='equipe'&&!S.me){app.innerHTML=pickHTML();bind();return;}
   var wd=workdays(S.cfg),h=headHTML()+tabsHTML();
-  if(S.role==='gestor'){
+  if(S.full){
     h+=stageHTML(wd);
-    if(S.view==='etapa')h+=etapaView();
-    else if(!ready(S.cfg))h+=etapaView();
+    if(S.view==='etapa'&&S.role==='gestor')h+=etapaView();
+    else if(!ready(S.cfg))h+=S.role==='gestor'?etapaView():'';
     else if(S.view==='team')h+=dayPick(wd)+dashView(wd);
     else h+=sellerView(S.view,wd);
+  }else if(S.role==='vendedor'){
+    h+=stageHTML(wd);
+    if(ready(S.cfg))h+=sellerView(S.me,wd);
   }else{
     h+=stageHTML(wd);
     if(ready(S.cfg))h+=S.view==='team'?dayPick(wd)+dashView(wd):sellerView(S.me,wd);
@@ -677,7 +690,7 @@ function bind(){
     load(false).then(function(){if(S.cfg&&S.code)lsSet(LSK+'-code',S.code);});
   };
   document.querySelectorAll('[data-me]').forEach(function(b){b.onclick=function(){S.me=b.dataset.me;lsSet(LSK+'-me',S.me);S.view='team';render();};});
-  if(el=q('#logout'))el.onclick=function(){if(S.role==='equipe'){S.me='';lsDel(LSK+'-me');}logout(false);};
+  if(el=q('#logout'))el.onclick=function(){S.me='';lsDel(LSK+'-me');logout(false);};
   if(el=q('#refresh'))el.onclick=function(){load(false).then(function(){toast('Atualizado.');});};
   document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){S.view=b.dataset.v;S.draft=null;render(true);};});
   if(el=q('#vDay'))el.onchange=function(){S.day=this.value;applyDay();render();};
@@ -698,7 +711,7 @@ function bind(){
   document.querySelectorAll('[data-rmst]').forEach(function(b){b.onclick=function(){var d=readDraft();d.stages.splice(+b.dataset.rmst,1);S.draft=d;render(true);};});
   if(el=q('#stagesBox')){document.querySelectorAll('#mA,#mB,#stagesBox input,#sellerChecks input').forEach(function(i){i.oninput=updateChk;i.onchange=updateChk;});updateChk();}
 }
-function currentSeller(){return S.role==='gestor'?S.view:S.me;}
+function currentSeller(){return S.full?S.view:S.me;}
 function submitQuick(e){
   e.preventDefault();if(S.busy)return;
   var f=e.target,w=document.getElementById('qWho'),name=f.dataset.qname||(w&&w.value)||'';
