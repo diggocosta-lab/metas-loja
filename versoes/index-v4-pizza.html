@@ -131,12 +131,6 @@ input[type=text],input[type=password],input[type=date],select{width:100%;min-wid
 .dcap span{color:var(--t-fg);font-variant-numeric:tabular-nums}
 .bigdonut{display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:center}
 .bigcap{display:grid;gap:4px;min-width:0;text-align:left}
-button.qtap{font:inherit;color:inherit;background:transparent;border:1.5px dashed var(--line);border-radius:14px;padding:10px 12px;cursor:pointer;text-align:left;display:grid;gap:4px;min-width:0;-webkit-tap-highlight-color:transparent}
-button.qtap:hover,button.qtap[aria-expanded=true]{border-color:var(--accent);background:var(--soft)}
-.qcta{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.02em}
-form.qf{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;margin-top:12px;padding:12px;border-radius:14px;background:var(--soft)}
-form.qf .fld.wide,form.qf .btn,form.qf .qh{grid-column:1/-1}
-form.qf .qh{font-size:13px;margin:0}
 .bnum{font-family:var(--font-display);font-weight:700;font-size:40px;line-height:1;color:var(--t-fg);font-variant-numeric:tabular-nums}
 @keyframes growarc{from{stroke-dasharray:0 100}}
 .arc.grow{animation:growarc .9s ease-out}
@@ -212,7 +206,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycby0rr5kD7_1sZEI3fVIo9Sakb
 var DOW=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 var CATS=[{id:'aparelho',label:'Aparelhos',one:'Aparelho',key:'goalA'},{id:'acessorio',label:'Acessórios',one:'Acessório',key:'goalB'}];
 var LSK='metas-loja-v1';
-var S={api:API_URL,demo:false,code:'',role:'',me:'',view:'',day:null,cfg:null,sales:[],now:'',loading:false,error:'',busy:false,loginErr:'',dash:'pizza',anim:false,quick:''};
+var S={api:API_URL,demo:false,code:'',role:'',me:'',view:'',day:null,cfg:null,sales:[],now:'',loading:false,error:'',busy:false,loginErr:'',dash:'pizza',anim:false};
 
 function $(s){return document.querySelector(s);}
 function pad(n){return n<10?'0'+n:''+n;}
@@ -394,12 +388,6 @@ function catHTML(name,cat,wd){
   h+='<div class="fact" data-tone="'+tS+'"><b>'+fmt(c.faltaEtapa)+'</b><span>falta na etapa · '+pct(c.pStage)+' feito</span></div><div class="fact"><b>'+fmt(c.total)+'</b><span>vendido na etapa</span></div></div>';
   return h+'<div class="bar" data-tone="'+tS+'" role="img" aria-label="'+pct(c.pStage)+' da meta da etapa"><i style="width:'+w100(c.pStage)+'%"></i></div></article>';
 }
-function quickHTML(cat,name,key){
-  if(S.quick!==key)return '';
-  var who=name?'':'<label class="fld wide"><span>Vendedor</span><select id="qWho">'+S.cfg.sellers.slice().sort(function(a,b){return (b.goal?1:0)-(a.goal?1:0);}).map(function(x){return '<option>'+esc(x.name)+'</option>';}).join('')+'</select></label>';
-  return '<form class="qf" id="qf" data-qcat="'+cat.id+'" data-qname="'+esc(name||'')+'" autocomplete="off"><p class="qh">Lançar '+cat.one+' em <b>'+dayLabel(S.day)+'</b>'+(name?' · '+esc(name):'')+'</p>'+who+
-    '<label class="fld"><span>Valor da venda</span><input type="text" id="qAmt" inputmode="decimal" placeholder="1.899,90"></label><button class="btn" type="submit"'+(S.busy?' disabled':'')+'>'+(S.busy?'Salvando…':'Lançar')+'</button></form>';
-}
 function entryHTML(name,wd){
   return '<section class="card"><h2>Lançar venda</h2><form class="entry" id="f" autocomplete="off">'+
     '<div class="fld"><span>Tipo</span><div class="seg" role="radiogroup" aria-label="Tipo de venda"><label><input type="radio" name="cat" value="aparelho" checked><span>Aparelho</span></label><label><input type="radio" name="cat" value="acessorio"><span>Acessório</span></label></div></div>'+
@@ -475,8 +463,7 @@ function donutCard(cat,wd,name){
   var sl=sellerOf(name),c=calc(name,cat,wd,S.day);
   if(!sl||!sl.goal||!c.goal)return '';
   var tS=tone(c.pStage,true),tD=tone(c.pDay,true);
-  var key='s|'+cat.id,open=S.quick===key;
-  return '<article class="card"><div class="row"><h2>Progresso · '+cat.label+'</h2><span class="of">a cada venda a pizza se atualiza</span></div><button type="button" class="qtap" data-quick="'+key+'" aria-expanded="'+open+'"><span class="of">'+(c.faltaEtapa>0.004?'Falta na etapa':'Etapa')+'</span><b style="font-size:22px">'+(c.faltaEtapa>0.004?fmt(c.faltaEtapa):'Meta batida')+'</b><span class="qcta">'+(open?'Fechar':'＋ Toque para lançar '+cat.one)+'</span></button>'+quickHTML(cat,name,key)+'<div class="donuts" style="margin-top:14px">'+
+  return '<article class="card"><div class="row"><h2>Progresso · '+cat.label+'</h2><span class="of">a cada venda a pizza se atualiza</span></div><div class="donuts">'+
     donutBlock(c.pStage,tS,'da etapa',130,fmt(c.total)+' de '+fmt(c.goal),c.faltaEtapa>0.004?'falta '+fmt(c.faltaEtapa):'meta batida')+
     donutBlock(c.pDay,tD,'do dia',130,fmt(c.day)+' de '+fmt(c.target),c.faltaDia>0.004?'falta '+fmt(c.faltaDia)+' hoje':'meta do dia batida')+
     '</div></article>';
@@ -507,7 +494,7 @@ function dashView(wd){
     var hd='<article class="card cat"><div class="row"><h2>'+cat.label+'</h2><span class="of">meta da loja '+(g?fmt(g):'não definida')+'</span></div>';
     if(!g)return hd+'<p class="nogoal">Sem meta de '+cat.label.toLowerCase()+' nesta etapa.</p></article>';
     if(S.dash==='pizza'){
-      return hd+'<div class="bigdonut" data-tone="'+tt+'">'+donutSVG(p,tt,'da meta da loja',170)+'<button type="button" class="bigcap qtap" data-quick="d|'+cat.id+'" aria-expanded="'+(S.quick==='d|'+cat.id)+'"><span class="lbl">Falta para a meta da loja</span><span class="bnum">'+(falta<=0.004?'Meta batida':fmt(falta))+'</span><span class="of">Vendido '+fmt(sold)+' de '+fmt(g)+'</span><span class="qcta">'+(S.quick==='d|'+cat.id?'Fechar':'＋ Toque para lançar '+cat.one)+'</span></button></div>'+quickHTML(cat,S.role==='gestor'?'':S.me,'d|'+cat.id)+
+      return hd+'<div class="bigdonut" data-tone="'+tt+'">'+donutSVG(p,tt,'da meta da loja',170)+'<div class="bigcap"><span class="lbl">Falta para a meta da loja</span><span class="bnum">'+(falta<=0.004?'Meta batida':fmt(falta))+'</span><span class="of">Vendido '+fmt(sold)+' de '+fmt(g)+'</span></div></div>'+
         '<div class="facts"><div class="fact"><b>'+fmt(day)+'</b><span>vendido em '+dayLabel(D)+'</span></div><div class="fact"><b>'+(wd.length-i)+' '+((wd.length-i)>1?'dias':'dia')+'</b><span>restam, contando este</span></div></div>'+
         '<div class="donuts">'+sls.map(function(o){return donutBlock(o.c.pStage,tone(o.c.pStage,true),'',100,fmt(o.c.total)+' de '+fmt(o.c.goal),o.c.faltaEtapa>0.004?'falta '+fmt(o.c.faltaEtapa):'meta batida',o.name);}).join('')+'</div>'+
         (extra>0?'<p class="small">Fora da meta (vendedores sem meta): '+fmt(extra)+'.</p>':'')+'</article>';
@@ -573,8 +560,6 @@ function bind(){
   if(el=q('#vDay'))el.onchange=function(){S.day=this.value;render();};
   document.querySelectorAll('input[name=dashmode]').forEach(function(r){r.onchange=function(){S.dash=r.value;lsSet(LSK+'-dash',S.dash);render();};});
   if(el=q('#f'))el.onsubmit=submitSale;
-  document.querySelectorAll('[data-quick]').forEach(function(b){b.onclick=function(){S.quick=S.quick===b.dataset.quick?'':b.dataset.quick;render();var a=document.getElementById('qAmt');if(a)a.focus();};});
-  if(el=q('#qf'))el.onsubmit=submitQuick;
   document.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){
     if(b.dataset.arm){clearTimeout(armT);send({action:'del',id:b.dataset.del,seller:currentSeller()},'Lançamento apagado.');return;}
     b.dataset.arm='1';b.textContent='Confirmar';clearTimeout(armT);armT=setTimeout(function(){delete b.dataset.arm;b.textContent='Apagar';},3500);
@@ -582,26 +567,16 @@ function bind(){
   if(el=q('#saveEtapa'))el.onclick=saveEtapa;
 }
 function currentSeller(){return S.role==='gestor'?S.view:S.me;}
-function submitQuick(e){
-  e.preventDefault();if(S.busy)return;
-  var f=e.target,w=document.getElementById('qWho'),name=f.dataset.qname||(w&&w.value)||'';
-  var amt=parseMoney($('#qAmt').value);
-  if(isNaN(amt)||amt<=0){toast('Digite o valor da venda, por exemplo 1.899,90.');$('#qAmt').focus();return;}
-  if(!name){toast('Escolha o vendedor.');return;}
-  doSale(name,f.dataset.qcat,S.day,amt,true);
-}
 function submitSale(e){
   e.preventDefault();if(S.busy)return;
   var amt=parseMoney($('#fAmt').value);
   if(isNaN(amt)||amt<=0){toast('Digite o valor da venda, por exemplo 1.899,90.');$('#fAmt').focus();return;}
-  doSale(currentSeller(),document.querySelector('input[name=cat]:checked').value,$('#fDay').value,amt,false);
-}
-function doSale(name,cat,date,amt,quick){
+  var cat=document.querySelector('input[name=cat]:checked').value,date=$('#fDay').value,name=currentSeller();
   var catObj=CATS.filter(function(c){return c.id===cat;})[0];
   S.anim=true;
   send({action:'add',seller:name,cat:cat,date:date,amount:Math.round(amt*100)/100},null).then(function(ok){
     if(!ok){S.anim=false;return;}
-    S.day=date;if(quick)S.quick='';render();
+    S.day=date;render();
     var wd=workdays(S.cfg),sl=sellerOf(name),c=calc(name,catObj,wd,date),msg='Lançado '+fmt(amt)+' em '+catObj.label.toLowerCase()+'. ';
     if(sl&&sl.goal&&c.goal){
       if(c.faltaEtapa<=0.004)msg+='Meta da etapa batida.';
@@ -609,7 +584,7 @@ function doSale(name,cat,date,amt,quick){
       else msg+='Faltam '+fmt(c.faltaDia)+' hoje.'+(c.restAfter>0?' Próximo dia: '+fmt(c.next)+'.':'');
     }
     toast(msg);
-    var f=$('#fAmt');if(f&&!quick)f.focus();
+    var f=$('#fAmt');if(f)f.focus();
   });
 }
 function saveEtapa(){
