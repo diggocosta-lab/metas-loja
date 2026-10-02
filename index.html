@@ -468,8 +468,10 @@ function donutSVG(p,tn,label,sz){
     '<text x="50" y="'+(label?'51':'56')+'" text-anchor="middle" class="dp">'+pct(p)+'</text>'+
     (label?'<text x="50" y="64" text-anchor="middle" class="dl">'+esc(label)+'</text>':'')+'</svg>';
 }
-function donutBlock(p,tn,label,sz,l1,l2,title){
-  return '<div class="donut" data-tone="'+tn+'">'+donutSVG(p,tn,label,sz)+'<div class="dcap">'+(title?'<strong class="dtt">'+esc(title)+'</strong>':'')+(l1?'<b>'+l1+'</b>':'')+(l2?'<span>'+l2+'</span>':'')+'</div></div>';
+function donutBlock(p,tn,label,sz,l1,l2,title,qk,qlabel){
+  var inner=(title?'<strong class="dtt">'+esc(title)+'</strong>':'')+(l1?'<b>'+l1+'</b>':'')+(l2?'<span>'+l2+'</span>':'');
+  var cap=qk?'<button type="button" class="dcap qtap" data-quick="'+esc(qk)+'" aria-expanded="'+(S.quick===qk)+'">'+inner+'<span class="qcta">'+(S.quick===qk?'Fechar':'＋ Lançar '+qlabel)+'</span></button>':'<div class="dcap">'+inner+'</div>';
+  return '<div class="donut" data-tone="'+tn+'">'+donutSVG(p,tn,label,sz)+cap+'</div>';
 }
 function donutCard(cat,wd,name){
   var sl=sellerOf(name),c=calc(name,cat,wd,S.day);
@@ -509,7 +511,8 @@ function dashView(wd){
     if(S.dash==='pizza'){
       return hd+'<div class="bigdonut" data-tone="'+tt+'">'+donutSVG(p,tt,'da meta da loja',170)+'<button type="button" class="bigcap qtap" data-quick="d|'+cat.id+'" aria-expanded="'+(S.quick==='d|'+cat.id)+'"><span class="lbl">Falta para a meta da loja</span><span class="bnum">'+(falta<=0.004?'Meta batida':fmt(falta))+'</span><span class="of">Vendido '+fmt(sold)+' de '+fmt(g)+'</span><span class="qcta">'+(S.quick==='d|'+cat.id?'Fechar':'＋ Toque para lançar '+cat.one)+'</span></button></div>'+quickHTML(cat,S.role==='gestor'?'':S.me,'d|'+cat.id)+
         '<div class="facts"><div class="fact"><b>'+fmt(day)+'</b><span>vendido em '+dayLabel(D)+'</span></div><div class="fact"><b>'+(wd.length-i)+' '+((wd.length-i)>1?'dias':'dia')+'</b><span>restam, contando este</span></div></div>'+
-        '<div class="donuts">'+sls.map(function(o){return donutBlock(o.c.pStage,tone(o.c.pStage,true),'',100,fmt(o.c.total)+' de '+fmt(o.c.goal),o.c.faltaEtapa>0.004?'falta '+fmt(o.c.faltaEtapa):'meta batida',o.name);}).join('')+'</div>'+
+        '<div class="donuts">'+sls.map(function(o){return donutBlock(o.c.pStage,tone(o.c.pStage,true),'',100,fmt(o.c.total)+' de '+fmt(o.c.goal),o.c.faltaEtapa>0.004?'falta '+fmt(o.c.faltaEtapa)+(o.c.faltaDia>0.004?' · hoje '+fmt(o.c.faltaDia):''):'meta batida',o.name,(S.role==='gestor'||o.name===S.me)?'v|'+cat.id+'|'+o.name:'',cat.one);}).join('')+'</div>'+
+        sls.map(function(o){var k='v|'+cat.id+'|'+o.name;return quickHTML(cat,o.name,k);}).join('')+
         (extra>0?'<p class="small">Fora da meta (vendedores sem meta): '+fmt(extra)+'.</p>':'')+'</article>';
     }
     return hd+'<div class="hoje" data-tone="'+tt+'"><span class="lbl">Falta para a meta da loja</span><span class="big"'+(falta<=0.004?' style="font-size:32px"':'')+'>'+(falta<=0.004?'Meta da loja batida':fmt(falta))+'</span>'+
