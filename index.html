@@ -257,7 +257,7 @@ function sellerOf(name){return S.cfg.sellers.filter(function(s){return s.name===
 function calc(name,cat,wd,D){
   var goal=S.cfg[cat.key]||0,i=wd.indexOf(D),n=wd.length;
   var mine=S.sales.filter(function(s){return s.seller===name&&s.cat===cat.id;});
-  var total=sum(mine,function(){return true;});
+  var total=sum(mine,function(x){return x.date<=D;});
   var before=sum(mine,function(s){return s.date<D;});
   var day=sum(mine,function(s){return s.date===D;});
   var restIncl=Math.max(1,n-i),target=Math.max(0,goal-before)/restIncl;
@@ -391,7 +391,7 @@ function catHTML(name,cat,wd){
   if(c.faltaEtapa<=0.004)h+='<div class="fact" data-tone="done"><b>Etapa batida</b><span>meta da etapa concluída</span></div>';
   else if(c.restAfter>0)h+='<div class="fact"><b>'+fmt(c.next)+'</b><span>por dia nos '+c.restAfter+' '+(c.restAfter>1?'dias':'dia')+' que restam depois deste</span></div>';
   else h+='<div class="fact" data-tone="low"><b>'+fmt(c.faltaEtapa)+'</b><span>último dia da etapa: é o que falta</span></div>';
-  h+='<div class="fact" data-tone="'+tS+'"><b>'+fmt(c.faltaEtapa)+'</b><span>falta na etapa · '+pct(c.pStage)+' feito</span></div><div class="fact"><b>'+fmt(c.total)+'</b><span>vendido na etapa</span></div></div>';
+  h+='<div class="fact" data-tone="'+tS+'"><b>'+fmt(c.faltaEtapa)+'</b><span>falta na etapa · '+pct(c.pStage)+' feito</span></div><div class="fact"><b>'+fmt(c.total)+'</b><span>vendido na etapa até '+dayLabel(S.day)+'</span></div></div>';
   return h+'<div class="bar" data-tone="'+tS+'" role="img" aria-label="'+pct(c.pStage)+' da meta da etapa"><i style="width:'+w100(c.pStage)+'%"></i></div></article>';
 }
 function quickHTML(cat,name,key){
