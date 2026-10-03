@@ -471,7 +471,7 @@ var ICON={aparelho:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="cur
   acessorio:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="7" rx="1.8"/><rect x="16.5" y="14" width="4.5" height="7" rx="1.8"/></svg>'};
 function catUp(cat){return cat.one.toUpperCase();}
 function catStrip(){
-  var c=curCat(),sc={mes:'Mês',etapa:'Etapa',dia:'Dia'}[S.scope]||'';
+  var c=curCat(),sc={dia:'Dia',etapa:'Etapa',mes:'Mês'}[S.scope]||'';
   return '<div class="catstrip" data-cat="'+c.id+'">'+ICON[c.id]+'<span>'+catUp(c)+'</span><small>'+sc+(S.view&&S.view!=='team'&&S.view!=='etapa'?' · '+esc(S.view):'')+'</small></div>';
 }
 function curCat(){return CATS.filter(function(c){return c.id===S.cat;})[0]||CATS[0];}
@@ -479,7 +479,7 @@ function pickBar(){
   var o=function(nm,val,cur,lab){return '<label><input type="radio" name="'+nm+'" value="'+val+'"'+(cur===val?' checked':'')+'><span>'+lab+'</span></label>';};
   var oc=function(val,lab){return '<label data-cat="'+val+'"><input type="radio" name="pcat" value="'+val+'"'+(S.cat===val?' checked':'')+'><span>'+ICON[val]+lab+'</span></label>';};
   return catStrip()+'<section class="card pick"><div class="seg catseg" role="radiogroup" aria-label="Categoria">'+oc('aparelho','Aparelho')+oc('acessorio','Acessório')+'</div>'+
-    '<div class="seg" role="radiogroup" aria-label="O que ver" style="grid-template-columns:repeat(3,1fr)">'+o('pscope','mes',S.scope,'Mês')+o('pscope','etapa',S.scope,'Etapa')+o('pscope','dia',S.scope,'Dia')+'</div></section>';
+    '<div class="seg" role="radiogroup" aria-label="O que ver" style="grid-template-columns:repeat(3,1fr)">'+o('pscope','dia',S.scope,'Dia')+o('pscope','etapa',S.scope,'Etapa')+o('pscope','mes',S.scope,'Mês')+'</div></section>';
 }
 function catHTML(name,cat,wd,part){
   var sl=sellerOf(name),c=calc(name,cat,wd,S.day);
@@ -808,7 +808,7 @@ function saveEtapa(){
 
 /* ---------- início ---------- */
 if(!S.api){render();return;}
-S.dash='pizza';S.cat=lsGet(LSK+'-cat')==='acessorio'?'acessorio':'aparelho';S.scope=({mes:1,etapa:1,dia:1})[lsGet(LSK+'-scope')]?lsGet(LSK+'-scope'):'etapa';
+S.dash='pizza';S.cat=lsGet(LSK+'-cat')==='acessorio'?'acessorio':'aparelho';S.scope=({mes:1,etapa:1,dia:1})[lsGet(LSK+'-scope')]?lsGet(LSK+'-scope'):'dia';
 var saved=lsGet(LSK+'-code');
 if(saved){S.code=saved;S.me=lsGet(LSK+'-me')||'';S.loading=true;render();load(false);}
 else render();
