@@ -263,7 +263,7 @@ function stagesInfo(D){
     var carry=0;
     st.forEach(function(x){
       var plan=Number(x.s[cat.key])||0,raw=plan+carry,eff=Math.max(0,raw);
-      var sold=sum(S.all,function(a){return a.cat===cat.id&&gs.indexOf(a.seller)>=0&&a.date>=x.first&&a.date<=x.last;});
+      var sold=sum(S.all,function(a){return a.cat===cat.id&&gs.indexOf(a.seller)>=0&&a.date>=x.first&&a.date<=x.last&&(!D||a.date<=D);});
       var closed=x.last<ref;
       x[cat.id]={plan:plan,eff:eff,sold:sold,closed:closed,carry:carry};
       carry=closed?(raw-sold):0;
@@ -434,7 +434,7 @@ function tabsHTML(){
   if(S.full){
     out+='<button type="button" class="tab" role="tab" data-v="team" aria-selected="'+(S.view==='team')+'"><b>Resumo</b><span>loja toda</span></button>';
     S.cfg.sellers.forEach(function(s){
-      var ta=sum(S.all,function(x){return x.seller===s.name&&x.cat==='aparelho';}),tb=sum(S.all,function(x){return x.seller===s.name&&x.cat==='acessorio';});
+      var ta=sum(S.all,function(x){return x.seller===s.name&&x.cat==='aparelho'&&(!S.day||x.date<=S.day);}),tb=sum(S.all,function(x){return x.seller===s.name&&x.cat==='acessorio'&&(!S.day||x.date<=S.day);});
       out+='<button type="button" class="tab" role="tab" data-v="'+esc(s.name)+'" aria-selected="'+(S.view===s.name)+'"><b>'+esc(s.name)+'</b><span>Ap '+fmt(ta)+'</span><span>Ac '+fmt(tb)+'</span></button>';
     });
     if(S.role==='gestor')out+='<button type="button" class="tab" role="tab" data-v="etapa" aria-selected="'+(S.view==='etapa')+'"><b>Etapa</b><span>metas e dias</span></button>';
