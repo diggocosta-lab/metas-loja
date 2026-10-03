@@ -461,8 +461,7 @@ function catHTML(name,cat,wd,part){
   }
   var t=tone(c.pDay,true),tS=tone(c.pStage,true),done=c.faltaDia<=0.004,key='s|'+cat.id,open=S.quick===key,fim=c.faltaEtapa<=0.004;
   if(part==='dia'){
-    h+='<div class="hoje" data-tone="'+t+'"><span class="lbl">'+(S.day===todayISO()?'Falta hoje':'Falta em '+dayLabel(S.day))+'</span><span class="big"'+(done?' style="font-size:32px"':'')+'>'+(done?'Meta do dia batida':fmt(c.faltaDia))+'</span>'+
-      '<div class="bar"><i style="width:'+w100(c.pDay)+'%"></i></div><span class="sub">Meta de hoje '+fmt(c.target)+' · vendido '+fmt(c.day)+'</span></div>'+
+    h+='<div class="bigdonut" data-tone="'+t+'">'+donutSVG(c.pDay,t,'do dia',130)+'<button type="button" class="bigcap qtap" data-quick="'+key+'" aria-expanded="'+open+'"><span class="lbl">'+(S.day===todayISO()?'Falta hoje':'Falta em '+dayLabel(S.day))+'</span><span class="bnum">'+(done?'Meta do dia batida':fmt(c.faltaDia))+'</span><span class="of">Vendido '+fmt(c.day)+' de '+fmt(c.target)+'</span><span class="qcta">'+(open?'Fechar':'＋ Toque para lançar '+cat.one)+'</span></button></div>'+quickHTML(cat,name,key)+
       '<p class="small">Meta fixa do dia '+fmt(c.fixed)+'.'+(!fim&&c.restAfter>0?' Depois deste dia: '+fmt(c.next)+' por dia nos '+c.restAfter+' '+(c.restAfter>1?'dias':'dia')+' que restam.':'')+'</p>';
     return h+'</article>';
   }
@@ -615,7 +614,7 @@ function dashView(wd){
         '<div class="row"><span class="of">'+(dn?'<b>meta do dia batida</b>':'falta <b>'+fmt(c.faltaDia)+'</b>')+' · fixa '+fmt(c.fixed)+'</span>'+
         (can?'<button type="button" class="btn ghost" data-quick="'+esc(k)+'" aria-expanded="'+(S.quick===k)+'">'+(S.quick===k?'Fechar':'＋ Lançar')+'</button>':'')+'</div>'+quickHTML(cat,s.name,k)+'</li>';
     });
-    out=dayPick(wd)+hd+'<div class="hoje" data-tone="'+td+'"><span class="lbl">'+(D===todayISO()?'Falta hoje · loja':'Falta em '+dayLabel(D)+' · loja')+'</span><span class="big"'+(done?' style="font-size:32px"':'')+'>'+(done?'Meta do dia batida':fmt(fd))+'</span><div class="bar"><i style="width:'+w100(pd)+'%"></i></div><span class="sub">Meta de hoje '+fmt(tgt)+' · vendido '+fmt(day)+'</span></div>'+
+    out=dayPick(wd)+hd+'<div class="bigdonut" data-tone="'+td+'">'+donutSVG(pd,td,'do dia',140)+'<button type="button" class="bigcap qtap" data-quick="d|'+cat.id+'" aria-expanded="'+(S.quick==='d|'+cat.id)+'"><span class="lbl">'+(D===todayISO()?'Falta hoje':'Falta em '+dayLabel(D))+'</span><span class="bnum">'+(done?'Meta do dia batida':fmt(fd))+'</span><span class="of">Vendido '+fmt(day)+' de '+fmt(tgt)+'</span><span class="qcta">'+(S.quick==='d|'+cat.id?'Fechar':'＋ Toque para lançar '+cat.one)+'</span></button></div>'+quickHTML(cat,S.full?'':S.me,'d|'+cat.id)+
       '<p class="small">Meta fixa do dia da loja '+fmt(fix)+'. Restam '+(wd.length-i)+' '+((wd.length-i)>1?'dias':'dia')+', contando este.</p>'+
       '<ul class="plain dlist">'+rows2+'</ul>'+(extra>0?'<p class="small">Fora da meta (vendedores sem meta): '+fmt(extra)+'.</p>':'')+'</article>';
   }
