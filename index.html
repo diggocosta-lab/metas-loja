@@ -434,8 +434,8 @@ function tabsHTML(){
   if(S.full){
     out+='<button type="button" class="tab" role="tab" data-v="team" aria-selected="'+(S.view==='team')+'"><b>Resumo</b><span>loja toda</span></button>';
     S.cfg.sellers.forEach(function(s){
-      var tot=sum(S.all,function(x){return x.seller===s.name;});
-      out+='<button type="button" class="tab" role="tab" data-v="'+esc(s.name)+'" aria-selected="'+(S.view===s.name)+'"><b>'+esc(s.name)+'</b><span>'+fmt(tot)+'</span></button>';
+      var ta=sum(S.all,function(x){return x.seller===s.name&&x.cat==='aparelho';}),tb=sum(S.all,function(x){return x.seller===s.name&&x.cat==='acessorio';});
+      out+='<button type="button" class="tab" role="tab" data-v="'+esc(s.name)+'" aria-selected="'+(S.view===s.name)+'"><b>'+esc(s.name)+'</b><span>Ap '+fmt(ta)+'</span><span>Ac '+fmt(tb)+'</span></button>';
     });
     if(S.role==='gestor')out+='<button type="button" class="tab" role="tab" data-v="etapa" aria-selected="'+(S.view==='etapa')+'"><b>Etapa</b><span>metas e dias</span></button>';
   }
