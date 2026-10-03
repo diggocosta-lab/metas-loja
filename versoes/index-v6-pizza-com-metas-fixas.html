@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Metas da Loja</title>
+<meta name="theme-color" content="#16408c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Metas">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+:root{
+  --bg:#f1f4f9; --surface:#ffffff; --ink:#132033; --muted:#566679; --line:#d8dfea; --soft:#e7ecf4;
+  --accent:#16408c; --accent-ink:#ffffff;
+  --low-bg:#fde6e3; --low-fg:#8f1d12; --low-solid:#d6382a;
+  --mid-bg:#fff1cf; --mid-fg:#6a4200; --mid-solid:#e0a010;
+  --ok-bg:#dcf3e3; --ok-fg:#0d5a2a; --ok-solid:#1e9a4e;
+  --done-bg:#1b8a45; --done-fg:#ffffff;
+  --none-bg:#edf0f6; --none-fg:#44546a;
+  --c1:#7a3fb5; --c2:#0b8a8c; --c3:#b45f06;
+  --font-display:'Barlow Condensed','Arial Narrow',system-ui,sans-serif;
+  --font-body:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1520; --surface:#152130; --ink:#e7edf6; --muted:#9aaabd; --line:#26364a; --soft:#1f2e42;
+    --accent:#8ab0ff; --accent-ink:#0d1520;
+    --low-bg:#3b1b18; --low-fg:#ffb7ad; --low-solid:#ef5b4c;
+    --mid-bg:#392d0c; --mid-fg:#ffd682; --mid-solid:#e6a817;
+    --ok-bg:#133220; --ok-fg:#92e2ae; --ok-solid:#2fb862;
+    --done-bg:#23a459; --done-fg:#04130a;
+    --none-bg:#1d2b3d; --none-fg:#a9b8cb;
+    --c1:#c2a2f0; --c2:#5ed3d5; --c3:#f0b25a;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1520; --surface:#152130; --ink:#e7edf6; --muted:#9aaabd; --line:#26364a; --soft:#1f2e42;
+  --accent:#8ab0ff; --accent-ink:#0d1520;
+  --low-bg:#3b1b18; --low-fg:#ffb7ad; --low-solid:#ef5b4c;
+  --mid-bg:#392d0c; --mid-fg:#ffd682; --mid-solid:#e6a817;
+  --ok-bg:#133220; --ok-fg:#92e2ae; --ok-solid:#2fb862;
+  --done-bg:#23a459; --done-fg:#04130a;
+  --none-bg:#1d2b3d; --none-fg:#a9b8cb;
+  --c1:#c2a2f0; --c2:#5ed3d5; --c3:#f0b25a;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.4;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+button,input,select{font:inherit;color:inherit}
+.app{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:18px 56px;display:grid;gap:14px}
+.app>*{min-width:0}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.eyebrow{margin:0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{margin:2px 0 0;font-family:var(--font-display);font-weight:700;font-size:34px;line-height:1;text-wrap:balance}
+h2{margin:0;font-family:var(--font-display);font-weight:700;font-size:24px}
+.pill{font-size:12px;font-weight:600;padding:5px 10px;border-radius:99px;background:var(--none-bg);color:var(--none-fg);border:0}
+.pill[data-s=ok]{background:var(--ok-bg);color:var(--ok-fg)}
+.pill[data-s=err]{background:var(--low-bg);color:var(--low-fg)}
+.pill[data-s=demo]{background:var(--mid-bg);color:var(--mid-fg)}
+.banner{margin:0;padding:10px 12px;border-radius:8px;background:var(--mid-bg);color:var(--mid-fg);font-size:14px}
+.banner.err{background:var(--low-bg);color:var(--low-fg)}
+
+[data-tone=low]{--t-bg:var(--low-bg);--t-fg:var(--low-fg);--t-solid:var(--low-solid)}
+[data-tone=mid]{--t-bg:var(--mid-bg);--t-fg:var(--mid-fg);--t-solid:var(--mid-solid)}
+[data-tone=ok]{--t-bg:var(--ok-bg);--t-fg:var(--ok-fg);--t-solid:var(--ok-solid)}
+[data-tone=done]{--t-bg:var(--done-bg);--t-fg:var(--done-fg);--t-solid:var(--done-bg)}
+[data-tone=none]{--t-bg:var(--none-bg);--t-fg:var(--none-fg);--t-solid:var(--line)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.lbl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.of{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+.stack{display:grid;gap:14px}
+.big30{font-family:var(--font-display);font-weight:700;font-size:30px;line-height:1}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{min-width:34px;text-align:center;padding:4px 6px;border-radius:6px;font-size:12px;font-weight:600;background:var(--none-bg);color:var(--none-fg);font-variant-numeric:tabular-nums}
+.chip[data-now]{outline:2px solid var(--accent);outline-offset:1px}
+.chip[data-past]{opacity:.55}
+.bar{height:8px;border-radius:99px;background:var(--soft);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--t-solid)}
+
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.tab{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left;display:grid;gap:2px}
+.tab b{font-family:var(--font-display);font-size:21px;line-height:1}
+.tab span{font-size:12px;color:var(--muted)}
+.tab[aria-selected=true]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.fld{display:grid;gap:4px;min-width:0}
+.fld>span{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+input[type=text],input[type=password],input[type=date],select{width:100%;min-width:0;height:44px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.btn{height:44px;padding:0 18px;border:0;border-radius:8px;background:var(--accent);color:var(--accent-ink);font-weight:600;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);height:32px;padding:0 10px;font-size:13px}
+.btn.ghost[data-arm]{color:var(--low-fg);border-color:var(--low-solid);background:var(--low-bg)}
+.btn.line{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+
+.cat{display:grid;gap:12px}
+.hoje{display:grid;gap:6px;padding:14px;border-radius:10px;background:var(--t-bg);color:var(--t-fg)}
+.hoje .lbl{color:var(--t-fg)}
+.hoje .big{font-family:var(--font-display);font-weight:700;font-size:48px;line-height:1;font-variant-numeric:tabular-nums}
+.hoje .bar{background:rgba(0,0,0,.14)}
+.hoje[data-tone=done] .bar i{background:var(--done-fg)}
+.hoje .sub{font-size:14px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.fact{display:grid;gap:2px;padding:10px;border-radius:8px;background:var(--none-bg)}
+.fact b{font-family:var(--font-display);font-size:22px;line-height:1.1;font-variant-numeric:tabular-nums}
+.fact span{font-size:12px;color:var(--muted)}
+.fact[data-tone]{background:var(--t-bg);color:var(--t-fg)}
+.fact[data-tone] span{color:var(--t-fg)}
+.nogoal{margin:0;color:var(--muted);font-size:14px}
+.donuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:18px 14px}
+.donut{display:grid;gap:8px;justify-items:center;text-align:center;min-width:0}
+.donut svg,.bigdonut svg{width:var(--sz,120px);height:var(--sz,120px);max-width:100%;display:block}
+.dp{font-family:var(--font-display);font-weight:700;font-size:23px;fill:var(--ink)}
+.dl{font-size:7.5px;fill:var(--muted)}
+.dcap{display:grid;gap:1px;font-size:13px;min-width:0}
+.dcap b{font-weight:600;font-variant-numeric:tabular-nums}
+.dtt{font-family:var(--font-display);font-size:20px;font-weight:700}
+.dcap span{color:var(--t-fg);font-variant-numeric:tabular-nums}
+.bigdonut{display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:center}
+.stg{border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:10px}
+.bigcap{display:grid;gap:4px;min-width:0;text-align:left}
+button.qtap{font:inherit;color:inherit;background:transparent;border:1.5px dashed var(--line);border-radius:14px;padding:10px 12px;cursor:pointer;text-align:left;display:grid;gap:4px;min-width:0;-webkit-tap-highlight-color:transparent}
+button.qtap:hover,button.qtap[aria-expanded=true]{border-color:var(--accent);background:var(--soft)}
+.qcta{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.02em}
+form.qf{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;margin-top:12px;padding:12px;border-radius:14px;background:var(--soft)}
+form.qf .fld.wide,form.qf .btn,form.qf .qh{grid-column:1/-1}
+form.qf .qh{font-size:13px;margin:0}
+.bnum{font-family:var(--font-display);font-weight:700;font-size:40px;line-height:1;color:var(--t-fg);font-variant-numeric:tabular-nums}
+@keyframes growarc{from{stroke-dasharray:0 100}}
+.arc.grow{animation:growarc .9s ease-out}
+@media (prefers-reduced-motion:reduce){.arc.grow{animation:none}}
+.chart svg{width:100%;height:auto;display:block}
+.lgs{display:flex;gap:6px 14px;flex-wrap:wrap;margin-top:6px;font-size:13px;color:var(--ink)}
+.lg{display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
+.lg i{width:14px;height:4px;border-radius:2px;display:inline-block}
+.lg i.dash{background:repeating-linear-gradient(90deg,var(--muted) 0 4px,transparent 4px 8px);height:2px}
+.dcompact .drow{padding-top:8px}
+path.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:drawline .9s ease-out forwards}
+@keyframes drawline{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){path.draw{animation:none;stroke-dasharray:none;stroke-dashoffset:0}}
+.dlist{gap:14px}
+.drow{display:grid;gap:6px;padding-top:12px;border-top:1px solid var(--line)}
+.drow:first-child{border-top:0;padding-top:0}
+.who2{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.who2 b{font-family:var(--font-display);font-size:20px}
+.drow .of b{color:var(--t-fg);font-weight:600}
+
+form.entry{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+#fAmt{font-family:var(--font-display);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden;height:44px}
+.seg label{display:grid}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:grid;place-items:center;font-weight:600;cursor:pointer;background:var(--bg);color:var(--muted)}
+.seg input:checked+span{background:var(--accent);color:var(--accent-ink)}
+.seg input:focus-visible+span{outline:3px solid var(--accent);outline-offset:-3px}
+ul.plain{list-style:none;margin:0;padding:0;display:grid}
+.log li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.log li:first-child{border-top:0}
+.log .when{color:var(--muted);font-size:13px}
+.empty{margin:0;color:var(--muted);font-size:14px}
+.tblwrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+th,td{padding:7px 8px;text-align:right;border-top:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{font-size:12px;color:var(--muted);font-weight:600;border-top:0}
+tfoot td{font-weight:700}
+td[data-tone] span{display:inline-block;padding:2px 8px;border-radius:6px;background:var(--t-bg);color:var(--t-fg);font-weight:600}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.small{font-size:13px;color:var(--muted);margin:0}
+.checks{display:flex;gap:8px;flex-wrap:wrap}
+.checks label{display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin:0;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;background:var(--t-solid);display:inline-block}
+.login{max-width:420px;margin:8vh auto 0}
+.who{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.who button{height:64px;font-family:var(--font-display);font-size:24px;font-weight:700;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer}
+.who button:hover{border-color:var(--accent)}
+.err{color:var(--low-fg)}
+.setup{display:grid;gap:10px}
+.setup code{background:var(--none-bg);padding:2px 6px;border-radius:5px;font-size:13px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:min(92vw,460px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;box-shadow:0 6px 24px rgba(0,0,0,.25);z-index:5}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .35s ease}}
+@media (max-width:420px){h1{font-size:30px}.hoje .big{font-size:42px}}
+</style>
+</head>
+<body>
+<main class="app" id="app"></main>
+<div id="toast" role="status" hidden></div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO: cole aqui o endereço do App da Web do Google
+   (o que termina em /exec). Veja o passo a passo no LEIA-ME.
+   ============================================================ */
+var API_URL = 'https://script.google.com/macros/s/AKfycby0rr5kD7_1sZEI3fVIo9SakbWsO3cGeQdoB9IlFBRVCpf2VGfFjBauR98LCf-zswMK/exec';
+
+(function(){
+'use strict';
+var DOW=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+var CATS=[{id:'aparelho',label:'Aparelhos',one:'Aparelho',key:'goalA'},{id:'acessorio',label:'Acessórios',one:'Acessório',key:'goalB'}];
+var LSK='metas-loja-v1';
+var S={api:API_URL,demo:false,code:'',role:'',me:'',view:'',day:null,cfg:null,sales:[],now:'',loading:false,error:'',busy:false,loginErr:'',dash:'pizza',anim:false,quick:'',full:false,raw:null,all:[],info:null,draft:null,legacy:false};
+
+function $(s){return document.querySelector(s);}
+function pad(n){return n<10?'0'+n:''+n;}
+function iso(dt){return dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());}
+function parseISO(s){var p=s.split('-').map(Number);return new Date(p[0],p[1]-1,p[2]);}
+function todayISO(){return S.now||iso(new Date());}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function fmt(n){n=Math.round((+n||0)*100)/100;var c=Math.abs(n%1)>0.004;return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:c?2:0,maximumFractionDigits:2});}
+function parseMoney(s){
+  s=String(s||'').replace(/R\$|\s/g,'');if(!s)return NaN;
+  if(s.indexOf(',')>=0)s=s.replace(/\./g,'').replace(',','.');
+  else if(/^\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,'');
+  var n=Number(s);return isFinite(n)?n:NaN;
+}
+function short(d){var p=d.split('-');return p[2]+'/'+p[1];}
+function dayLabel(d){return DOW[parseISO(d).getDay()]+' '+short(d);}
+function tone(p,has){if(!has)return 'none';if(p>=1)return 'done';if(p>=0.8)return 'ok';if(p>=0.4)return 'mid';return 'low';}
+function pct(p){return Math.round(p*100)+'%';}
+function w100(p){return Math.max(0,Math.min(1,p))*100;}
+function sum(list,f){var t=0;list.forEach(function(s){if(f(s))t+=Number(s.amount)||0;});return t;}
+var toastT=null;
+function toast(m){var t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},4800);}
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+
+/* ---------- cálculo ---------- */
+function workdays(c){
+  var out=[];if(!c||!c.start||!c.days)return out;
+  var dt=parseISO(c.start),g=0;
+  while(out.length<c.days&&g<400){if(dt.getDay()!==0)out.push(iso(dt));dt.setDate(dt.getDate()+1);g++;}
+  return out;
+}
+function ready(c){return !!(c&&c.start&&c.days>0&&(c.planA>0||c.planB>0||c.goalA>0||c.goalB>0));}
+/* ---------- modelo: mês → etapas → dias ---------- */
+function stageList(R){
+  return ((R&&R.stages)||[]).map(function(s){var wd=workdays(s);return {s:s,wd:wd,first:wd[0],last:wd[wd.length-1]};}).filter(function(x){return x.wd.length;});
+}
+function allDays(){return S.info?S.info.stages.reduce(function(a,x){return a.concat(x.wd);},[]):[];}
+/* Cada etapa tem a sua meta, preenchida pelo gestor (valor por vendedor). A meta do mês é só referência.
+   O que sobrou ou faltou numa etapa já encerrada (último dia antes de hoje/do dia visto) é somado na etapa seguinte:
+   meta da etapa = meta cadastrada + (meta da etapa anterior − vendido nela). Vendeu a mais, a seguinte diminui. */
+function stagesInfo(D){
+  var ref=D<todayISO()?D:todayISO();
+  var R=S.raw,st=stageList(R),gs=R.sellers.filter(function(x){return x.goal;}).map(function(x){return x.name;}),n=gs.length,info={stages:st,month:{}};
+  CATS.forEach(function(cat){
+    var carry=0;
+    st.forEach(function(x){
+      var plan=Number(x.s[cat.key])||0,raw=plan+carry,eff=Math.max(0,raw);
+      var sold=sum(S.all,function(a){return a.cat===cat.id&&gs.indexOf(a.seller)>=0&&a.date>=x.first&&a.date<=x.last&&(!D||a.date<=D);});
+      var closed=x.last<ref;
+      x[cat.id]={plan:plan,eff:eff,sold:sold,closed:closed,carry:carry};
+      carry=closed?(raw-sold):0;
+    });
+    var month=Number(R[cat.key==='goalA'?'monthA':'monthB'])||0;
+    var soldM=sum(S.all,function(a){return a.cat===cat.id&&gs.indexOf(a.seller)>=0&&a.date<=D;});
+    info.month[cat.id]={goal:month,sold:soldM,falta:Math.max(0,month-soldM)};
+  });
+  info.cur=st.filter(function(x){return x.wd.indexOf(D)>=0;})[0]||st[0];
+  info.n=n;
+  return info;
+}
+/* monta a "etapa em vista" (S.cfg) e as vendas dela (S.sales) para o dia escolhido */
+function applyDay(){
+  var info=stagesInfo(S.day||''),cur=info.cur;S.info=info;
+  if(!cur){S.cfg={start:'',days:0,goalA:0,goalB:0,planA:0,planB:0,sellers:S.raw.sellers,idx:0};S.sales=[];return;}
+  var n=info.n||1;
+  S.cfg={start:cur.s.start,days:cur.s.days,goalA:info.n?cur.aparelho.eff/n:0,goalB:info.n?cur.acessorio.eff/n:0,
+    planA:cur.aparelho.plan,planB:cur.acessorio.plan,sellers:S.raw.sellers,idx:info.stages.indexOf(cur)};
+  S.sales=S.all.filter(function(a){return a.date>=cur.first&&a.date<=cur.last;});
+}
+function defaultDay(wd){
+  var t=todayISO();if(!wd.length)return null;
+  if(t<=wd[0])return wd[0];
+  var last=wd[0];wd.forEach(function(d){if(d<=t)last=d;});return last;
+}
+function sellerOf(name){return S.cfg.sellers.filter(function(s){return s.name===name;})[0];}
+/* meta do dia = (meta da etapa − vendido antes do dia) ÷ dias úteis que restam contando o dia */
+function calc(name,cat,wd,D){
+  var goal=S.cfg[cat.key]||0,i=wd.indexOf(D),n=wd.length,t=todayISO();
+  /* dia de referência: para dias futuros vale o ritmo de hoje (não faz sentido contar como zero os dias que ainda não aconteceram) */
+  var R=D;if(D>t){R=wd[0];wd.forEach(function(d){if(d<=t)R=d;});}
+  var iR=wd.indexOf(R);
+  var mine=S.sales.filter(function(s){return s.seller===name&&s.cat===cat.id;});
+  var total=sum(mine,function(x){return x.date<=D;});
+  var before=sum(mine,function(s){return s.date<R;});
+  var day=sum(mine,function(s){return s.date===D;});
+  var restIncl=Math.max(1,n-iR),target=Math.max(0,goal-before)/restIncl;
+  var restAfter=n-i-1,upto=before+target*(i-iR)+day;
+  return {goal:goal,fixed:n?goal/n:0,total:total,day:day,target:target,faltaDia:Math.max(0,target-day),faltaEtapa:Math.max(0,goal-total),
+    restAfter:restAfter,next:restAfter>0?Math.max(0,goal-upto)/restAfter:null,
+    pDay:target>0?day/target:(goal>0?1:0),pStage:goal?total/goal:0};
+}
+
+/* ---------- acesso aos dados (Google ou demonstração) ---------- */
+var demoDb=null;
+function demoInit(){
+  var t=new Date(),start=iso(t);
+  var s1={start:start,days:9,goalA:40000,goalB:13000},w1=workdays(s1),d2=parseISO(w1[w1.length-1]);d2.setDate(d2.getDate()+1);
+  var s2={start:iso(d2),days:6,goalA:30000,goalB:7000},w2=workdays(s2),d3=parseISO(w2[w2.length-1]);d3.setDate(d3.getDate()+1);
+  var s3={start:iso(d3),days:6,goalA:24000,goalB:5000},w3=workdays(s3),d4=parseISO(w3[w3.length-1]);d4.setDate(d4.getDate()+1);
+  var s4={start:iso(d4),days:6,goalA:15000,goalB:4000};
+  demoDb={etapa:{monthA:109000,monthB:29000,stages:[s1,s2,s3,s4],sellers:[{name:'Fábio',goal:true},{name:'Davy',goal:true},{name:'Alice',goal:false}]},sales:[]};
+  var wd=w1;
+  demoDb.sales.push({id:'d1',date:wd[0],seller:'Fábio',cat:'aparelho',amount:1500},{id:'d2',date:wd[0],seller:'Davy',cat:'aparelho',amount:2600},{id:'d3',date:wd[0],seller:'Fábio',cat:'acessorio',amount:380});
+}
+function demoRespond(b){
+  if(!b){
+    var c=S.code,E=JSON.parse(JSON.stringify(demoDb.etapa)),now=iso(new Date());
+    if(c==='gestor')return {ok:true,role:'gestor',me:'',etapa:E,sales:demoDb.sales.slice(),now:now};
+    if(c==='fabio')return {ok:true,role:'total',me:'Fábio',etapa:E,sales:demoDb.sales.slice(),now:now};
+    if(c==='davy'||c==='alice'){
+      var nm=c==='davy'?'Davy':'Alice',me=E.sellers.filter(function(x){return x.name===nm;})[0],ng=E.sellers.filter(function(x){return x.goal;}).length||1,st=E.stages[0];
+      return {ok:true,role:'vendedor',me:nm,etapa:{monthA:0,monthB:0,sellers:[{name:nm,goal:me.goal}],stages:[{start:st.start,days:st.days,goalA:st.goalA/ng,goalB:st.goalB/ng}]},sales:demoDb.sales.filter(function(x){return x.seller===nm;}),now:now};
+    }
+    return {ok:true,role:'equipe',etapa:E,sales:demoDb.sales.slice(),now:now};
+  }
+  if(b.action==='add'){demoDb.sales.push({id:'d'+Date.now(),date:b.date,seller:b.seller,cat:b.cat,amount:b.amount});return {ok:true};}
+  if(b.action==='del'){demoDb.sales=demoDb.sales.filter(function(s){return s.id!==b.id;});return {ok:true};}
+  if(b.action==='setEtapa'){demoDb.etapa=JSON.parse(JSON.stringify(b.etapa));return {ok:true};}
+  return {ok:false,error:'Ação desconhecida.'};
+}
+function call(body){
+  if(S.demo)return Promise.resolve(demoRespond(body));
+  var opt,url=S.api;
+  if(body){body.code=S.code;opt={method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)};}
+  else url=S.api+(S.api.indexOf('?')>=0?'&':'?')+'code='+encodeURIComponent(S.code)+'&t='+Date.now();
+  return fetch(url,opt).then(function(r){return r.json();});
+}
+function load(quiet){
+  if(!quiet){S.loading=true;}
+  return call(null).then(function(r){
+    S.loading=false;
+    if(!r.ok){
+      if(r.error==='codigo'){S.error='';S.loginErr='Código incorreto.';logout(true);return;}
+      S.error=r.error||'Erro ao ler os dados.';render();return;
+    }
+    S.error='';S.role=r.role;S.full=(r.role==='gestor'||r.role==='total');S.all=r.sales||[];S.now=r.now||'';if(r.me)S.me=r.me;
+    var et=r.etapa;S.legacy=!et.stages;
+    if(S.legacy){var ng=et.sellers.filter(function(x){return x.goal;}).length;et={monthA:0,monthB:0,sellers:et.sellers,stages:et.start?[{start:et.start,days:et.days,goalA:(et.goalA||0)*ng,goalB:(et.goalB||0)*ng}]:[]};}
+    S.raw=et;S.info=stagesInfo(S.day||'');
+    var wd=allDays();if(!S.day||wd.indexOf(S.day)<0)S.day=defaultDay(wd);
+    applyDay();
+    if(S.role==='vendedor'){S.view=S.me;}
+    else if(S.role==='equipe'){
+      if(!S.me||!sellerOf(S.me)){S.me=lsGet(LSK+'-me')||'';if(!sellerOf(S.me))S.me='';}
+      if(S.view!=='team'&&S.view!==S.me)S.view=ready(S.cfg)?'team':S.me;
+    }else if(!S.view||(S.view!=='team'&&S.view!=='etapa'&&!sellerOf(S.view))||(S.view==='etapa'&&S.role!=='gestor')){S.view=ready(S.cfg)||S.role!=='gestor'?'team':'etapa';}
+    render();
+  }).catch(function(){
+    S.loading=false;S.error='Sem conexão com a planilha. Confira a internet e tente de novo.';render();
+  });
+}
+function send(body,okMsg){
+  S.busy=true;render();
+  return call(body).then(function(r){
+    S.busy=false;
+    if(!r.ok){
+      if(r.error==='codigo'){S.loginErr='Código incorreto.';logout(true);return false;}
+      toast(r.error||'Não foi possível salvar.');render();return false;
+    }
+    if(okMsg)toast(okMsg);
+    return load(true).then(function(){return true;});
+  }).catch(function(){S.busy=false;toast('Sem conexão. A venda não foi salva, tente de novo.');render();return false;});
+}
+function logout(keepErr){
+  S.code='';S.role='';S.cfg=null;S.raw=null;S.all=[];S.sales=[];S.draft=null;S.view='';if(!keepErr)S.loginErr='';
+  lsDel(LSK+'-code');render();
+}
+
+/* ---------- telas ---------- */
+function setupHTML(){
+  return '<div class="card setup login"><h1>Metas da Loja</h1><p class="nogoal">O painel ainda não está ligado à planilha do Google. Siga o LEIA-ME, copie o endereço do App da Web e cole na linha <code>var API_URL = \'\';</code> do arquivo <code>index.html</code>.</p>'+
+    '<button class="btn" id="goDemo" type="button">Ver demonstração</button><p class="small">A demonstração usa dados de exemplo e não grava nada.</p></div>';
+}
+function loginHTML(){
+  return '<form class="card login" id="loginForm" autocomplete="off"><div><p class="eyebrow">Loja · metas por etapa</p><h1>Entrar</h1></div>'+
+    '<label class="fld"><span>Código de acesso</span><input type="password" id="code" autocomplete="current-password" autofocus></label>'+
+    (S.loginErr?'<p class="small err" role="alert">'+esc(S.loginErr)+'</p>':'')+
+    '<button class="btn" type="submit"'+(S.loading?' disabled':'')+'>'+(S.loading?'Entrando…':'Entrar')+'</button>'+
+    (S.demo?'<p class="small">Demonstração: digite gestor, fabio, davy ou alice.</p>':'')+'</form>';
+}
+function pickHTML(){
+  return '<div class="card login"><div><p class="eyebrow">Quem é você?</p><h1>Escolha seu nome</h1></div><div class="who">'+
+    S.cfg.sellers.map(function(s){return '<button type="button" data-me="'+esc(s.name)+'">'+esc(s.name)+'</button>';}).join('')+'</div></div>';
+}
+function headHTML(){
+  var title=S.full?'Gestão':S.role==='vendedor'?(S.me||'Metas'):(S.view==='team'?'Resumo':(S.me||'Metas'));
+  return '<header class="top"><div><p class="eyebrow">Loja · metas por etapa</p><h1>'+esc(title)+'</h1></div><div class="row" style="gap:8px">'+
+    (S.demo?'<span class="pill" data-s="demo">Demonstração</span>':'<span class="pill" data-s="'+(S.error?'err':'ok')+'">'+(S.error?'Sem conexão':'Sincronizado')+'</span>')+
+    '<button type="button" class="pill" id="refresh">Atualizar</button><button type="button" class="pill" id="logout">Sair</button></div></header>'+
+    (S.error?'<p class="banner err">'+esc(S.error)+'</p>':'');
+}
+function stageHTML(wd){
+  var c=S.cfg;
+  if(!ready(c))return '<section class="card"><h2>Etapa ainda não preenchida</h2><p class="nogoal">'+(S.role==='gestor'?'Preencha os dados na aba Etapa.':'Avise o gestor para preencher a etapa. Assim que ele salvar, as metas aparecem aqui.')+'</p></section>';
+  var t=todayISO(),D=S.day,i=wd.indexOf(D);
+  var chips=wd.map(function(d){return '<span class="chip"'+(d===D?' data-now="1"':'')+(d<t?' data-past="1"':'')+' title="'+dayLabel(d)+'">'+d.slice(8)+'</span>';}).join('');
+  return '<section class="card"><div class="row"><span class="lbl">Etapa '+(c.idx+1)+(S.info.stages.length>1?' de '+S.info.stages.length:'')+'</span><span class="of">'+short(wd[0])+' a '+short(wd[wd.length-1])+'</span></div>'+
+    '<div class="row"><span class="big30">'+c.days+' dias úteis</span><span class="of">dia '+(i+1)+' de '+c.days+' · restam '+(c.days-i)+' contando este</span></div>'+
+    '<div class="chips" aria-label="Dias úteis da etapa">'+chips+'</div>'+
+    '<p class="small">Meta por vendedor nesta etapa: '+(c.goalA?fmt(c.goalA)+' em aparelhos':'sem meta de aparelhos')+' · '+(c.goalB?fmt(c.goalB)+' em acessórios':'sem meta de acessórios')+'</p>'+adjNote()+'</section>';
+}
+function adjNote(){
+  var cur=S.info.cur,n=S.info.n||1,out=[];
+  CATS.forEach(function(cat){
+    var o=cur[cat.id];
+    if(Math.abs(o.eff-o.plan)>0.5)out.push(cat.label.toLowerCase()+': cadastrada '+fmt(o.plan/n)+' '+(o.eff>o.plan?'+ ':'− ')+fmt(Math.abs(o.eff-o.plan)/n)+' da etapa anterior = '+fmt(o.eff/n));
+  });
+  return out.length?'<p class="small">Por vendedor, com o que ficou da etapa anterior ('+out.join(' · ')+').</p>':'';
+}
+function tabsHTML(){
+  var out='';
+  if(S.role==='equipe'&&ready(S.cfg)){
+    out+='<button type="button" class="tab" role="tab" data-v="team" aria-selected="'+(S.view==='team')+'"><b>Resumo</b><span>loja toda</span></button>'+
+      '<button type="button" class="tab" role="tab" data-v="'+esc(S.me)+'" aria-selected="'+(S.view===S.me)+'"><b>'+esc(S.me)+'</b><span>meu painel e lançar</span></button>';
+  }
+  if(S.full){
+    out+='<button type="button" class="tab" role="tab" data-v="team" aria-selected="'+(S.view==='team')+'"><b>Resumo</b><span>loja toda</span></button>';
+    S.cfg.sellers.forEach(function(s){
+      var ta=sum(S.all,function(x){return x.seller===s.name&&x.cat==='aparelho'&&(!S.day||x.date<=S.day);}),tb=sum(S.all,function(x){return x.seller===s.name&&x.cat==='acessorio'&&(!S.day||x.date<=S.day);});
+      out+='<button type="button" class="tab" role="tab" data-v="'+esc(s.name)+'" aria-selected="'+(S.view===s.name)+'"><b>'+esc(s.name)+'</b><span>Ap '+fmt(ta)+'</span><span>Ac '+fmt(tb)+'</span></button>';
+    });
+    if(S.role==='gestor')out+='<button type="button" class="tab" role="tab" data-v="etapa" aria-selected="'+(S.view==='etapa')+'"><b>Etapa</b><span>metas e dias</span></button>';
+  }
+  return out?'<nav class="tabs" role="tablist" aria-label="Seções">'+out+'</nav>':'';
+}
+function dayPick(wd){
+  var t=todayISO();
+  return '<section class="card"><label class="fld"><span>Dia que você está vendo</span><select id="vDay">'+
+    S.info.stages.map(function(x,k){return '<optgroup label="Etapa '+(k+1)+' · '+short(x.first)+' a '+short(x.last)+'">'+x.wd.map(function(d){return '<option value="'+d+'"'+(d===S.day?' selected':'')+'>'+dayLabel(d)+(d===t?' (hoje)':'')+'</option>';}).join('')+'</optgroup>';}).join('')+'</select></label></section>';
+}
+function catHTML(name,cat,wd){
+  var sl=sellerOf(name),c=calc(name,cat,wd,S.day);
+  var h='<article class="card cat"><div class="row"><h2>'+cat.label+'</h2><span class="of">meta da etapa '+(c.goal&&sl.goal?fmt(c.goal):(S.info.month[cat.id].goal>0&&S.info.month[cat.id].falta<=0.004?'cumprida':'não definida'))+'</span></div>';
+  if(!sl.goal||!c.goal){
+    return h+'<p class="nogoal">'+(sl.goal?(S.info.month[cat.id].goal>0&&S.info.month[cat.id].falta<=0.004?'A meta do mês de '+cat.label.toLowerCase()+' já foi batida. Nada falta nesta etapa.':'Meta de '+cat.label.toLowerCase()+' ainda não definida.'):esc(name)+' está sem meta por enquanto.')+' Vendido na etapa: <b>'+fmt(c.total)+'</b> · no dia: <b>'+fmt(c.day)+'</b>.</p></article>';
+  }
+  var t=tone(c.pDay,true),tS=tone(c.pStage,true),done=c.faltaDia<=0.004;
+  h+='<div class="hoje" data-tone="'+t+'"><span class="lbl">'+(S.day===todayISO()?'Falta hoje':'Falta em '+dayLabel(S.day))+'</span><span class="big"'+(done?' style="font-size:32px"':'')+'>'+(done?'Meta do dia batida':fmt(c.faltaDia))+'</span>'+
+    '<div class="bar"><i style="width:'+w100(c.pDay)+'%"></i></div><span class="sub">Meta para fechar a etapa '+fmt(c.target)+' · meta fixa '+fmt(c.fixed)+' · vendido no dia '+fmt(c.day)+'</span></div><div class="facts">';
+  if(c.faltaEtapa<=0.004)h+='<div class="fact" data-tone="done"><b>Etapa batida</b><span>meta da etapa concluída</span></div>';
+  else if(c.restAfter>0)h+='<div class="fact"><b>'+fmt(c.next)+'</b><span>por dia nos '+c.restAfter+' '+(c.restAfter>1?'dias':'dia')+' que restam depois deste</span></div>';
+  else h+='<div class="fact" data-tone="low"><b>'+fmt(c.faltaEtapa)+'</b><span>último dia da etapa: é o que falta</span></div>';
+  h+='<div class="fact" data-tone="'+tS+'"><b>'+fmt(c.faltaEtapa)+'</b><span>falta na etapa · '+pct(c.pStage)+' feito</span></div><div class="fact"><b>'+fmt(c.total)+'</b><span>vendido na etapa até '+dayLabel(S.day)+'</span></div></div>';
+  return h+'<div class="bar" data-tone="'+tS+'" role="img" aria-label="'+pct(c.pStage)+' da meta da etapa"><i style="width:'+w100(c.pStage)+'%"></i></div></article>';
+}
+function quickHTML(cat,name,key){
+  if(S.quick!==key)return '';
+  var who=name?'':'<label class="fld wide"><span>Vendedor</span><select id="qWho">'+S.cfg.sellers.slice().sort(function(a,b){return (b.goal?1:0)-(a.goal?1:0);}).map(function(x){return '<option>'+esc(x.name)+'</option>';}).join('')+'</select></label>';
+  return '<form class="qf" id="qf" data-qcat="'+cat.id+'" data-qname="'+esc(name||'')+'" autocomplete="off"><p class="qh">Lançar '+cat.one+' em <b>'+dayLabel(S.day)+'</b>'+(name?' · '+esc(name):'')+'</p>'+who+
+    '<label class="fld"><span>Valor da venda</span><input type="text" id="qAmt" inputmode="decimal" placeholder="1.899,90"></label><button class="btn" type="submit"'+(S.busy?' disabled':'')+'>'+(S.busy?'Salvando…':'Lançar')+'</button></form>';
+}
+function entryHTML(name,wd){
+  return '<section class="card"><h2>Lançar venda</h2><form class="entry" id="f" autocomplete="off">'+
+    '<div class="fld"><span>Tipo</span><div class="seg" role="radiogroup" aria-label="Tipo de venda"><label><input type="radio" name="cat" value="aparelho" checked><span>Aparelho</span></label><label><input type="radio" name="cat" value="acessorio"><span>Acessório</span></label></div></div>'+
+    '<label class="fld"><span>Dia</span><select id="fDay">'+wd.map(function(d){return '<option value="'+d+'"'+(d===S.day?' selected':'')+'>'+dayLabel(d)+'</option>';}).join('')+'</select></label>'+
+    '<label class="fld"><span>Valor da venda</span><input type="text" id="fAmt" inputmode="decimal" placeholder="1.899,90"></label>'+
+    '<button class="btn" type="submit"'+(S.busy?' disabled':'')+'>'+(S.busy?'Salvando…':'Lançar')+'</button></form></section>';
+}
+function logHTML(name){
+  var mine=S.sales.filter(function(s){return s.seller===name;}).slice().reverse();
+  var log=mine.length?mine.slice(0,40).map(function(s){
+    var cat=CATS.filter(function(x){return x.id===s.cat;})[0];
+    return '<li><div><b>'+fmt(s.amount)+'</b> · '+(cat?cat.one:esc(s.cat))+'<div class="when">'+dayLabel(s.date)+'</div></div><button type="button" class="btn ghost" data-del="'+esc(s.id)+'">Apagar</button></li>';
+  }).join(''):'<li class="empty">Nenhuma venda lançada nesta etapa.</li>';
+  return '<section class="card"><h2>Lançamentos</h2><ul class="plain log">'+log+'</ul></section>';
+}
+function sellerView(name,wd){
+  return dayPick(wd)+entryHTML(name,wd)+'<div class="stack">'+CATS.map(function(c){return catHTML(name,c,wd)+chartCard(cat_(c),wd,name);}).join('')+'</div>'+logHTML(name);
+}
+
+/* ---------- gráfico de progressão ---------- */
+function cat_(c){return c;}
+var SERIES_COLORS=['var(--c1)','var(--c2)','var(--c3)'];
+/* % da meta acumulado dia a dia, até o dia que está sendo visto */
+function chartHTML(cat,wd,D,who){
+  var goalOne=S.cfg[cat.key]||0,n=wd.length,iD=Math.max(0,wd.indexOf(D));
+  var names=S.cfg.sellers.filter(function(s){return s.goal&&goalOne>0&&(!who||s.name===who);}).map(function(s){return s.name;});
+  if(!names.length||n<2)return '';
+  function cum(list){return wd.map(function(d,i){return i>iD?null:sum(S.sales,function(x){return x.cat===cat.id&&list.indexOf(x.seller)>=0&&x.date<=d;})/(goalOne*list.length);});}
+  var series=[];
+  if(who){series.push({name:who,color:'var(--accent)',w:3,v:cum([who])});}
+  else{
+    series.push({name:'Loja',color:'var(--accent)',w:3.5,v:cum(names)});
+    names.forEach(function(nm,k){series.push({name:nm,color:SERIES_COLORS[k%3],w:2,v:cum([nm])});});
+  }
+  var ideal=wd.map(function(d,i){return (i+1)/n;});
+  var mx=1;series.forEach(function(sr){sr.v.forEach(function(v){if(v!==null&&v>mx)mx=v;});});
+  var ymax=Math.max(1,Math.ceil(mx*4)/4);
+  var W=360,H=210,L=40,R=14,T=14,B=26,pw=W-L-R,ph=H-T-B;
+  var X=function(i){return L+(i/(n-1))*pw;},Y=function(v){return T+(1-v/ymax)*ph;};
+  var g='';
+  var ticks=[0,0.5,1];if(ymax>1)ticks.push(ymax);
+  ticks.forEach(function(t){g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(t)+'" y2="'+Y(t)+'" stroke="var(--line)" stroke-width="1"'+(t===1?' stroke-dasharray="0"':'')+'/><text x="'+(L-6)+'" y="'+(Y(t)+3.5)+'" text-anchor="end" font-size="10" fill="var(--muted)">'+Math.round(t*100)+'%</text>';});
+  var step=n>12?2:1;
+  wd.forEach(function(d,i){if(i%step===0||i===n-1)g+='<text x="'+X(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="'+(i===iD?'var(--ink)':'var(--muted)')+'" font-weight="'+(i===iD?'700':'400')+'">'+d.slice(8)+'</text>';});
+  g+='<path d="'+ideal.map(function(v,i){return (i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);}).join(' ')+'" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>';
+  series.slice().reverse().forEach(function(sr){
+    var pts=[];sr.v.forEach(function(v,i){if(v!==null)pts.push([X(i),Y(v)]);});
+    if(!pts.length)return;
+    var d=pts.map(function(q,i){return (i?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1);}).join(' ');
+    g+='<path d="'+d+'" fill="none" stroke="'+sr.color+'" stroke-width="'+sr.w+'" stroke-linecap="round" stroke-linejoin="round"'+(S.anim?' pathLength="1" class="draw"':'')+'/>';
+    var last=pts[pts.length-1];
+    g+='<circle cx="'+last[0].toFixed(1)+'" cy="'+last[1].toFixed(1)+'" r="'+(sr.w>3?4.5:3.5)+'" fill="'+sr.color+'" stroke="var(--surface)" stroke-width="1.5"/>';
+  });
+  var leg='<span class="lg"><i class="dash"></i>Ritmo ideal '+pct(ideal[iD])+'</span>';
+  series.forEach(function(sr){var v=sr.v[iD]||0;leg+='<span class="lg"><i style="background:'+sr.color+'"></i>'+esc(sr.name)+' '+pct(v)+'</span>';});
+  var label=cat.label+': '+series.map(function(sr){return sr.name+' '+pct(sr.v[iD]||0);}).join(', ')+', ritmo ideal '+pct(ideal[iD]);
+  return '<div class="chart"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(label)+'">'+g+'</svg><div class="lgs">'+leg+'</div></div>';
+}
+
+/* ---------- gráficos de pizza (rosca) ---------- */
+function donutSVG(p,tn,label,sz){
+  var v=Math.max(0,Math.min(1,p))*100;
+  return '<svg viewBox="0 0 100 100" data-tone="'+tn+'" style="--sz:'+sz+'px" role="img" aria-label="'+esc(label)+' '+pct(p)+'">'+
+    '<circle cx="50" cy="50" r="40" fill="none" stroke="var(--soft)" stroke-width="14"/>'+
+    (v>0?'<circle class="arc'+(S.anim?' grow':'')+'" cx="50" cy="50" r="40" fill="none" stroke="var(--t-solid)" stroke-width="14" stroke-linecap="butt" pathLength="100" stroke-dasharray="'+v.toFixed(2)+' 100" transform="rotate(-90 50 50)"/>':'')+
+    '<text x="50" y="'+(label?'51':'56')+'" text-anchor="middle" class="dp">'+pct(p)+'</text>'+
+    (label?'<text x="50" y="64" text-anchor="middle" class="dl">'+esc(label)+'</text>':'')+'</svg>';
+}
+function donutBlock(p,tn,label,sz,l1,l2,title,qk,qlabel){
+  var inner=(title?'<strong class="dtt">'+esc(title)+'</strong>':'')+(l1?'<b>'+l1+'</b>':'')+(l2?'<span>'+l2+'</span>':'');
+  var cap=qk?'<button type="button" class="dcap qtap" data-quick="'+esc(qk)+'" aria-expanded="'+(S.quick===qk)+'">'+inner+'<span class="qcta">'+(S.quick===qk?'Fechar':'＋ Lançar '+qlabel)+'</span></button>':'<div class="dcap">'+inner+'</div>';
+  return '<div class="donut" data-tone="'+tn+'">'+donutSVG(p,tn,label,sz)+cap+'</div>';
+}
+function donutCard(cat,wd,name){
+  var sl=sellerOf(name),c=calc(name,cat,wd,S.day);
+  if(!sl||!sl.goal||!c.goal)return '';
+  var tS=tone(c.pStage,true),tD=tone(c.pDay,true);
+  var key='s|'+cat.id,open=S.quick===key;
+  return '<article class="card"><div class="row"><h2>Progresso · '+cat.label+'</h2><span class="of">a cada venda a pizza se atualiza</span></div><button type="button" class="qtap" data-quick="'+key+'" aria-expanded="'+open+'"><span class="of">'+(c.faltaEtapa>0.004?'Falta na etapa':'Etapa')+'</span><b style="font-size:22px">'+(c.faltaEtapa>0.004?fmt(c.faltaEtapa):'Meta batida')+'</b><span class="qcta">'+(open?'Fechar':'＋ Toque para lançar '+cat.one)+'</span></button>'+quickHTML(cat,name,key)+'<div class="donuts" style="margin-top:14px">'+
+    donutBlock(c.pStage,tS,'da etapa',130,fmt(c.total)+' de '+fmt(c.goal),c.faltaEtapa>0.004?'falta '+fmt(c.faltaEtapa):'meta batida')+
+    donutBlock(c.pDay,tD,'do dia',130,fmt(c.day)+' de '+fmt(c.target),c.faltaDia>0.004?'falta '+fmt(c.faltaDia)+' hoje':'meta do dia batida')+
+    '</div></article>';
+}
+function chartCard(cat,wd,name){
+  if(!ready(S.cfg)||S.dash==='barras')return '';
+  if(S.dash==='pizza')return donutCard(cat,wd,name);
+  var h=chartHTML(cat,wd,S.day,name);
+  return h?'<article class="card"><div class="row"><h2>Progressão · '+cat.label+'</h2><span class="of">% da meta, dia a dia</span></div>'+h+'<p class="small">A linha tracejada é o ritmo ideal para fechar a meta no último dia.</p></article>':'';
+}
+function monthHTML(){
+  var info=S.info,m=info.month,list=CATS.filter(function(c){return m[c.id].goal>0;});
+  if(!list.length)return '';
+  var out='<section class="card"><div class="row"><h2>Meta do mês</h2><span class="of">vendido até '+dayLabel(S.day)+'</span></div><div class="donuts">'+
+    list.map(function(c){var o=m[c.id],p=o.sold/o.goal;return donutBlock(p,tone(p,true),'do mês',110,fmt(o.sold)+' de '+fmt(o.goal),o.falta>0.004?'falta '+fmt(o.falta):'meta do mês batida',c.label);}).join('')+'</div>';
+  list.forEach(function(c){
+    out+='<p class="small" style="margin-top:14px"><b>'+c.label+' por etapa</b></p><ul class="plain dlist">'+info.stages.map(function(x,k){
+      var o=x[c.id],p=o.eff>0?o.sold/o.eff:(o.closed?1:0),cur=x===info.cur;
+      return '<li class="drow" data-tone="'+tone(p,o.eff>0)+'"><div class="who2"><b>Etapa '+(k+1)+(cur?' · em vista':'')+'</b><span class="of">'+short(x.first)+' a '+short(x.last)+'</span></div><div class="bar"><i style="width:'+w100(p)+'%"></i></div>'+
+        '<div class="row"><span class="of">'+fmt(o.sold)+' de <b>'+fmt(o.eff)+'</b>'+(Math.abs(o.eff-o.plan)>0.5?' · cadastrada '+fmt(o.plan):'')+'</span><span class="of">'+(o.eff>0?pct(p):'')+'</span></div></li>';
+    }).join('')+'</ul>';
+  });
+  return out+'<p class="small">A meta do mês é a referência. Cada etapa tem a meta cadastrada pelo gestor, e o que faltou (ou sobrou) numa etapa encerrada é somado (ou abatido) na etapa seguinte. O mesmo vale dentro da etapa, dia a dia.</p></section>';
+}
+function dashView(wd){
+  var D=S.day,t=todayISO(),i=wd.indexOf(D);
+  var h='<section class="card"><div class="row"><h2>Resumo da loja</h2><span class="of">vendido até '+dayLabel(D)+(D===t?' (hoje)':'')+'</span></div>'+
+    '<p class="small">Soma de quem tem meta nesta etapa. A meta da loja é a meta de cada vendedor multiplicada pelo número de vendedores com meta.</p></section>';
+  h+=monthHTML();
+  h+='<div class="stack">'+CATS.map(function(cat){
+    var g=0,sold=0,day=0,extra=0,rows='',sls=[];
+    S.cfg.sellers.forEach(function(s){
+      var c=calc(s.name,cat,wd,D);
+      if(s.goal&&c.goal){
+        g+=c.goal;sold+=c.total;day+=c.day;sls.push({name:s.name,c:c});
+        rows+='<li class="drow" data-tone="'+tone(c.pStage,true)+'"><div class="who2"><b>'+esc(s.name)+'</b><span class="of">'+fmt(c.total)+' de '+fmt(c.goal)+'</span></div>'+
+          '<div class="bar"><i style="width:'+w100(c.pStage)+'%"></i></div>'+
+          '<div class="row"><span class="of">'+(c.faltaEtapa>0.004?'falta <b>'+fmt(c.faltaEtapa)+'</b>':'<b>meta batida</b>')+'</span><span class="of">'+pct(c.pStage)+'</span></div></li>';
+      }else{extra+=c.total;}
+    });
+    var p=g?sold/g:0,tt=tone(p,g>0),falta=Math.max(0,g-sold);
+    var hd='<article class="card cat"><div class="row"><h2>'+cat.label+'</h2><span class="of">meta da loja '+(g?fmt(g):'não definida')+'</span></div>';
+    if(!g)return hd+'<p class="nogoal">Sem meta de '+cat.label.toLowerCase()+' nesta etapa.</p></article>';
+    if(S.dash==='pizza'){
+      return hd+'<div class="bigdonut" data-tone="'+tt+'">'+donutSVG(p,tt,'da meta da loja',170)+'<button type="button" class="bigcap qtap" data-quick="d|'+cat.id+'" aria-expanded="'+(S.quick==='d|'+cat.id)+'"><span class="lbl">Falta para a meta da loja</span><span class="bnum">'+(falta<=0.004?'Meta batida':fmt(falta))+'</span><span class="of">Vendido '+fmt(sold)+' de '+fmt(g)+'</span><span class="qcta">'+(S.quick==='d|'+cat.id?'Fechar':'＋ Toque para lançar '+cat.one)+'</span></button></div>'+quickHTML(cat,S.full?'':S.me,'d|'+cat.id)+
+        '<div class="facts"><div class="fact"><b>'+fmt(day)+'</b><span>vendido em '+dayLabel(D)+'</span></div><div class="fact"><b>'+(wd.length-i)+' '+((wd.length-i)>1?'dias':'dia')+'</b><span>restam, contando este</span></div></div>'+
+        '<div class="donuts">'+sls.map(function(o){return donutBlock(o.c.pStage,tone(o.c.pStage,true),'',100,fmt(o.c.total)+' de '+fmt(o.c.goal),o.c.faltaEtapa>0.004?'falta '+fmt(o.c.faltaEtapa)+(o.c.faltaDia>0.004?' · hoje '+fmt(o.c.faltaDia):''):'meta batida',o.name,(S.full||o.name===S.me)?'v|'+cat.id+'|'+o.name:'',cat.one);}).join('')+'</div>'+
+        sls.map(function(o){var k='v|'+cat.id+'|'+o.name;return quickHTML(cat,o.name,k);}).join('')+
+        (extra>0?'<p class="small">Fora da meta (vendedores sem meta): '+fmt(extra)+'.</p>':'')+'</article>';
+    }
+    return hd+'<div class="hoje" data-tone="'+tt+'"><span class="lbl">Falta para a meta da loja</span><span class="big"'+(falta<=0.004?' style="font-size:32px"':'')+'>'+(falta<=0.004?'Meta da loja batida':fmt(falta))+'</span>'+
+      '<div class="bar"><i style="width:'+w100(p)+'%"></i></div><span class="sub">Vendido '+fmt(sold)+' de '+fmt(g)+' · '+pct(p)+'</span></div>'+
+      '<div class="facts"><div class="fact"><b>'+fmt(day)+'</b><span>vendido em '+dayLabel(D)+'</span></div>'+
+      '<div class="fact"><b>'+(wd.length-i)+' '+((wd.length-i)>1?'dias':'dia')+'</b><span>restam, contando este</span></div></div>'+
+      (S.dash==='graf'?chartHTML(cat,wd,D,null)+'<ul class="plain dlist dcompact">'+rows+'</ul>':'<ul class="plain dlist">'+rows+'</ul>')+
+      (extra>0?'<p class="small">Fora da meta (vendedores sem meta): '+fmt(extra)+'.</p>':'')+'</article>';
+  }).join('')+'</div>';
+  return h;
+}
+function numStr(v){return v?String(v).replace('.',','):'';}
+function draftFromRaw(){
+  var R=S.raw||{},st=(R.stages&&R.stages.length?R.stages:[{start:'',days:'',goalA:'',goalB:''}]);
+  return {monthA:numStr(R.monthA),monthB:numStr(R.monthB),
+    stages:st.map(function(x){return {start:x.start||'',days:x.days?String(x.days):'',goalA:numStr(x.goalA),goalB:numStr(x.goalB)};}),
+    sellers:(R.sellers||[]).map(function(x){return {name:x.name,goal:x.goal};})};
+}
+function readDraft(){
+  var g=function(id){var e=document.getElementById(id);return e?e.value:'';};
+  var d={monthA:g('mA'),monthB:g('mB'),stages:[],sellers:[]};
+  document.querySelectorAll('.stg').forEach(function(b){d.stages.push({start:b.querySelector('.sStart').value,days:b.querySelector('.sDays').value,goalA:b.querySelector('.sGoalA').value,goalB:b.querySelector('.sGoalB').value});});
+  document.querySelectorAll('[data-sg]').forEach(function(cb,i){d.sellers.push({name:S.raw.sellers[i].name,goal:cb.checked});});
+  return d;
+}
+function mny(v){v=String(v||'').trim();return v===''?0:parseMoney(v);}
+function updateChk(){
+  var d=readDraft(),tA=0,tB=0,ng=d.sellers.filter(function(x){return x.goal;}).length;
+  document.querySelectorAll('.stg').forEach(function(b,i){
+    var st=d.stages[i],ws=workdays({start:st.start,days:parseInt(st.days,10)||0});
+    var a=mny(st.goalA)||0,c=mny(st.goalB)||0;
+    b.querySelector('.stgEnd').textContent=(ws.length?'Vai de '+short(ws[0])+' a '+short(ws[ws.length-1])+' ('+ws.length+' dias úteis, sem domingos). ':'')+(ng&&(a||c)?'Por vendedor ('+ng+' com meta): '+fmt(a/ng)+' em aparelhos · '+fmt(c/ng)+' em acessórios.':'');
+    tA+=a;tB+=c;
+  });
+  var mA=mny(d.monthA)||0,mB=mny(d.monthB)||0,el=document.getElementById('sumChk');
+  if(el)el.textContent='Soma das etapas (loja): aparelhos '+fmt(tA)+(mA?' de '+fmt(mA)+' do mês':'')+' · acessórios '+fmt(tB)+(mB?' de '+fmt(mB)+' do mês':'')+'.';
+}
+function etapaView(){
+  var d=S.draft||(S.draft=draftFromRaw());
+  return (S.legacy?'<p class="banner err">A planilha ainda está na versão antiga do Code.gs. Cole o Code.gs novo no Apps Script e publique uma nova versão (veja o LEIA-ME) para salvar metas do mês e várias etapas.</p>':'')+
+    '<section class="card"><h2>Meta do mês</h2><p class="small">Valor de referência da loja toda. Não muda as metas das etapas.</p><div class="two">'+
+    '<label class="fld"><span>Meta do mês · aparelhos</span><input type="text" inputmode="decimal" id="mA" value="'+esc(d.monthA)+'" placeholder="ex.: 109.000"></label>'+
+    '<label class="fld"><span>Meta do mês · acessórios</span><input type="text" inputmode="decimal" id="mB" value="'+esc(d.monthB)+'" placeholder="ex.: 29.000"></label></div></section>'+
+    '<section class="card" id="stagesBox"><h2>Etapas do mês</h2><p class="small">Cadastre as etapas do mês. A meta da etapa é da <b>loja</b> e é dividida igualmente entre os vendedores com meta. O que faltar numa etapa encerrada soma na etapa seguinte.</p>'+
+    d.stages.map(function(x,i){
+      return '<div class="stg"><div class="row"><b>Etapa '+(i+1)+'</b>'+(d.stages.length>1?'<button type="button" class="btn ghost" data-rmst="'+i+'">Remover</button>':'')+'</div><div class="two">'+
+        '<label class="fld"><span>Primeiro dia</span><input type="date" class="sStart" value="'+esc(x.start)+'"></label>'+
+        '<label class="fld"><span>Dias úteis</span><input type="text" inputmode="numeric" class="sDays" value="'+esc(x.days)+'" placeholder="ex.: 9"></label>'+
+        '<label class="fld"><span>Meta da etapa · aparelhos (loja)</span><input type="text" inputmode="decimal" class="sGoalA" value="'+esc(x.goalA)+'" placeholder="ex.: 40.000"></label>'+
+        '<label class="fld"><span>Meta da etapa · acessórios (loja)</span><input type="text" inputmode="decimal" class="sGoalB" value="'+esc(x.goalB)+'" placeholder="ex.: 13.000"></label></div><p class="small stgEnd"></p></div>';
+    }).join('')+
+    '<button type="button" class="btn ghost" id="addStage">＋ Adicionar etapa</button><p class="small" id="sumChk"></p></section>'+
+    '<section class="card"><p class="small" style="margin-bottom:8px">Quem tem meta</p><div class="checks" id="sellerChecks">'+
+    d.sellers.map(function(x,i){return '<label><input type="checkbox" data-sg="'+i+'"'+(x.goal?' checked':'')+'> '+esc(x.name)+'</label>';}).join('')+'</div>'+
+    '<button class="btn" type="button" id="saveEtapa"'+(S.busy?' disabled':'')+'>'+(S.busy?'Salvando…':'Salvar metas')+'</button>'+
+    '<p class="small">Os dias úteis contam a partir do primeiro dia, pulando os domingos. Ao salvar, a planilha refaz o consolidado e as abas de cada vendedor.</p></section>';
+}
+function render(skip){
+  if(!skip&&document.getElementById('stagesBox')&&S.raw)S.draft=readDraft();
+  var app=$('#app'),keep=document.activeElement&&document.activeElement.id,val=keep?document.activeElement.value:null;
+  if(!S.api&&!S.demo){app.innerHTML=setupHTML();bind();return;}
+  if(!S.code||!S.cfg){app.innerHTML=loginHTML();bind();return;}
+  if(S.role==='equipe'&&!S.me){app.innerHTML=pickHTML();bind();return;}
+  var wd=workdays(S.cfg),h=headHTML()+tabsHTML();
+  if(S.full){
+    h+=stageHTML(wd);
+    if(S.view==='etapa'&&S.role==='gestor')h+=etapaView();
+    else if(!ready(S.cfg))h+=S.role==='gestor'?etapaView():'';
+    else if(S.view==='team')h+=dayPick(wd)+dashView(wd);
+    else h+=sellerView(S.view,wd);
+  }else if(S.role==='vendedor'){
+    h+=stageHTML(wd);
+    if(ready(S.cfg))h+=sellerView(S.me,wd);
+  }else{
+    h+=stageHTML(wd);
+    if(ready(S.cfg))h+=S.view==='team'?dayPick(wd)+dashView(wd):sellerView(S.me,wd);
+  }
+  h+='<p class="legend"><span data-tone="low"><i></i>Abaixo de 40%</span><span data-tone="mid"><i></i>40% a 79%</span><span data-tone="ok"><i></i>80% a 99%</span><span data-tone="done"><i></i>Meta batida</span></p>';
+  app.innerHTML=h;bind();
+  if(S.anim&&!S.busy){setTimeout(function(){S.anim=false;},1500);}
+  if(keep&&val!==null){var el=document.getElementById(keep);if(el&&el.tagName==='INPUT'&&el.type!=='radio'&&el.type!=='checkbox'){el.value=val;}}
+}
+
+/* ---------- eventos ---------- */
+var armT=null;
+function bind(){
+  var q=function(s){return document.querySelector(s);};
+  var el;
+  if(el=q('#goDemo'))el.onclick=function(){S.demo=true;demoInit();render();};
+  if(el=q('#loginForm'))el.onsubmit=function(e){
+    e.preventDefault();var c=q('#code').value.trim();if(!c)return;
+    S.code=c;S.loginErr='';S.loading=true;render();
+    load(false).then(function(){if(S.cfg&&S.code)lsSet(LSK+'-code',S.code);});
+  };
+  document.querySelectorAll('[data-me]').forEach(function(b){b.onclick=function(){S.me=b.dataset.me;lsSet(LSK+'-me',S.me);S.view='team';render();};});
+  if(el=q('#logout'))el.onclick=function(){S.me='';lsDel(LSK+'-me');logout(false);};
+  if(el=q('#refresh'))el.onclick=function(){load(false).then(function(){toast('Atualizado.');});};
+  document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){S.view=b.dataset.v;S.draft=null;render(true);};});
+  if(el=q('#vDay'))el.onchange=function(){S.day=this.value;applyDay();render();};
+  document.querySelectorAll('input[name=dashmode]').forEach(function(r){r.onchange=function(){S.dash=r.value;lsSet(LSK+'-dash',S.dash);render();};});
+  if(el=q('#f'))el.onsubmit=submitSale;
+  document.querySelectorAll('[data-quick]').forEach(function(b){b.onclick=function(){S.quick=S.quick===b.dataset.quick?'':b.dataset.quick;render();var a=document.getElementById('qAmt');if(a)a.focus();};});
+  if(el=q('#qf'))el.onsubmit=submitQuick;
+  document.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){
+    if(b.dataset.arm){clearTimeout(armT);send({action:'del',id:b.dataset.del,seller:currentSeller()},'Lançamento apagado.');return;}
+    b.dataset.arm='1';b.textContent='Confirmar';clearTimeout(armT);armT=setTimeout(function(){delete b.dataset.arm;b.textContent='Apagar';},3500);
+  };});
+  if(el=q('#saveEtapa'))el.onclick=saveEtapa;
+  if(el=q('#addStage'))el.onclick=function(){
+    var d=readDraft(),last=d.stages[d.stages.length-1],ws=workdays({start:last.start,days:parseInt(last.days,10)||0}),nx='';
+    if(ws.length){var dt=parseISO(ws[ws.length-1]);dt.setDate(dt.getDate()+1);nx=iso(dt);}
+    d.stages.push({start:nx,days:'6',goalA:'',goalB:''});S.draft=d;render(true);
+  };
+  document.querySelectorAll('[data-rmst]').forEach(function(b){b.onclick=function(){var d=readDraft();d.stages.splice(+b.dataset.rmst,1);S.draft=d;render(true);};});
+  if(el=q('#stagesBox')){document.querySelectorAll('#mA,#mB,#stagesBox input,#sellerChecks input').forEach(function(i){i.oninput=updateChk;i.onchange=updateChk;});updateChk();}
+}
+function currentSeller(){return S.full?S.view:S.me;}
+function submitQuick(e){
+  e.preventDefault();if(S.busy)return;
+  var f=e.target,w=document.getElementById('qWho'),name=f.dataset.qname||(w&&w.value)||'';
+  var amt=parseMoney($('#qAmt').value);
+  if(isNaN(amt)||amt<=0){toast('Digite o valor da venda, por exemplo 1.899,90.');$('#qAmt').focus();return;}
+  if(!name){toast('Escolha o vendedor.');return;}
+  doSale(name,f.dataset.qcat,S.day,amt,true);
+}
+function submitSale(e){
+  e.preventDefault();if(S.busy)return;
+  var amt=parseMoney($('#fAmt').value);
+  if(isNaN(amt)||amt<=0){toast('Digite o valor da venda, por exemplo 1.899,90.');$('#fAmt').focus();return;}
+  doSale(currentSeller(),document.querySelector('input[name=cat]:checked').value,$('#fDay').value,amt,false);
+}
+function doSale(name,cat,date,amt,quick){
+  var catObj=CATS.filter(function(c){return c.id===cat;})[0];
+  S.anim=true;
+  send({action:'add',seller:name,cat:cat,date:date,amount:Math.round(amt*100)/100},null).then(function(ok){
+    if(!ok){S.anim=false;return;}
+    S.day=date;applyDay();if(quick)S.quick='';render();
+    var wd=workdays(S.cfg),sl=sellerOf(name),c=calc(name,catObj,wd,date),msg='Lançado '+fmt(amt)+' em '+catObj.label.toLowerCase()+'. ';
+    if(sl&&sl.goal&&c.goal){
+      if(c.faltaEtapa<=0.004)msg+='Meta da etapa batida.';
+      else if(c.faltaDia<=0.004)msg+='Meta do dia batida.'+(c.restAfter>0?' Próximo dia: '+fmt(c.next)+'.':'');
+      else msg+='Faltam '+fmt(c.faltaDia)+' hoje.'+(c.restAfter>0?' Próximo dia: '+fmt(c.next)+'.':'');
+    }
+    toast(msg);
+    var f=$('#fAmt');if(f&&!quick)f.focus();
+  });
+}
+function saveEtapa(){
+  if(S.busy)return;
+  if(S.legacy){toast('Antes de salvar, atualize o Code.gs na planilha (veja o LEIA-ME).');return;}
+  var d=readDraft(),mA=mny(d.monthA),mB=mny(d.monthB);
+  if(isNaN(mA)||isNaN(mB)||mA<0||mB<0){toast('Confira a meta do mês.');return;}
+  var stages=[],seen={};
+  for(var i=0;i<d.stages.length;i++){
+    var x=d.stages[i],n=x.days.trim()===''?0:parseInt(x.days,10),a=mny(x.goalA),b=mny(x.goalB);
+    if(!x.start){toast('Etapa '+(i+1)+': informe o primeiro dia.');return;}
+    if(isNaN(n)||n<1||n>60){toast('Etapa '+(i+1)+': dias úteis de 1 a 60.');return;}
+    if(isNaN(a)||isNaN(b)||a<0||b<0){toast('Etapa '+(i+1)+': confira as metas.');return;}
+    var dup=false;workdays({start:x.start,days:n}).forEach(function(dd){if(seen[dd])dup=true;seen[dd]=1;});
+    if(dup){toast('Etapa '+(i+1)+' tem dias que já pertencem a outra etapa.');return;}
+    stages.push({start:x.start,days:n,goalA:a,goalB:b});
+  }
+  stages.sort(function(p,q){return p.start<q.start?-1:1;});
+  if(stages.length>12){toast('No máximo 12 etapas.');return;}
+  var sellers=d.sellers;
+  send({action:'setEtapa',etapa:{monthA:mA,monthB:mB,stages:stages,sellers:sellers}},'Metas salvas.').then(function(ok){if(ok){S.draft=null;S.day=null;S.view='team';load(true);}});
+}
+
+/* ---------- início ---------- */
+if(!S.api){render();return;}
+S.dash='pizza';
+var saved=lsGet(LSK+'-code');
+if(saved){S.code=saved;S.me=lsGet(LSK+'-me')||'';S.loading=true;render();load(false);}
+else render();
+setInterval(function(){if(S.code&&S.cfg&&!S.busy&&!document.hidden)load(true);},60000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&S.code&&S.cfg&&!S.busy)load(true);});
+})();
+</script>
+</body>
+</html>
