@@ -573,7 +573,6 @@ function monthHTML(){
 function dashView(wd){
   var D=S.day,t=todayISO(),i=wd.indexOf(D);
   var h='<section class="card"><div class="row"><h2>Resumo da loja</h2><span class="of">vendido até '+dayLabel(D)+(D===t?' (hoje)':'')+'</span></div>'+
-    '<div class="seg" role="radiogroup" aria-label="Forma de ver o resumo" style="max-width:360px;grid-template-columns:repeat(3,1fr)"><label><input type="radio" name="dashmode" value="pizza"'+(S.dash==='pizza'?' checked':'')+'><span>Pizza</span></label><label><input type="radio" name="dashmode" value="graf"'+(S.dash==='graf'?' checked':'')+'><span>Linhas</span></label><label><input type="radio" name="dashmode" value="barras"'+(S.dash==='barras'?' checked':'')+'><span>Barras</span></label></div>'+
     '<p class="small">Soma de quem tem meta nesta etapa. A meta da loja é a meta de cada vendedor multiplicada pelo número de vendedores com meta.</p></section>';
   h+=monthHTML();
   h+='<div class="stack">'+CATS.map(function(cat){
@@ -765,7 +764,7 @@ function saveEtapa(){
 
 /* ---------- início ---------- */
 if(!S.api){render();return;}
-S.dash=({graf:1,barras:1,pizza:1})[lsGet(LSK+'-dash')]?lsGet(LSK+'-dash'):'pizza';
+S.dash='pizza';
 var saved=lsGet(LSK+'-code');
 if(saved){S.code=saved;S.me=lsGet(LSK+'-me')||'';S.loading=true;render();load(false);}
 else render();
