@@ -130,6 +130,7 @@ input[type=text],input[type=password],input[type=date],select{width:100%;min-wid
 .dtt{font-family:var(--font-display);font-size:20px;font-weight:700}
 .dcap span{color:var(--t-fg);font-variant-numeric:tabular-nums}
 .bigdonut{display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:center}
+.fold{gap:10px}.fold summary{cursor:pointer;font-weight:600;font-size:15px}.fold summary::marker{color:var(--muted)}.help{display:grid;gap:8px;margin-top:8px}
 .stg{border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:10px}
 .bigcap{display:grid;gap:4px;min-width:0;text-align:left}
 button.qtap{font:inherit;color:inherit;background:transparent;border:1.5px dashed var(--line);border-radius:14px;padding:10px 12px;cursor:pointer;text-align:left;display:grid;gap:4px;min-width:0;-webkit-tap-highlight-color:transparent}
@@ -221,7 +222,8 @@ function iso(dt){return dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.get
 function parseISO(s){var p=s.split('-').map(Number);return new Date(p[0],p[1]-1,p[2]);}
 function todayISO(){return S.now||iso(new Date());}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-function fmt(n){n=Math.round((+n||0)*100)/100;var c=Math.abs(n%1)>0.004;return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:c?2:0,maximumFractionDigits:2});}
+function fmtC(n){n=Math.round((+n||0)*100)/100;var c=Math.abs(n%1)>0.004;return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:c?2:0,maximumFractionDigits:2});}
+function fmt(n){return 'R$ '+Math.round(+n||0).toLocaleString('pt-BR',{maximumFractionDigits:0});}
 function parseMoney(s){
   s=String(s||'').replace(/R\$|\s/g,'');if(!s)return NaN;
   if(s.indexOf(',')>=0)s=s.replace(/\./g,'').replace(',','.');
@@ -412,10 +414,8 @@ function stageHTML(wd){
   if(!ready(c))return '<section class="card"><h2>Etapa ainda não preenchida</h2><p class="nogoal">'+(S.role==='gestor'?'Preencha os dados na aba Etapa.':'Avise o gestor para preencher a etapa. Assim que ele salvar, as metas aparecem aqui.')+'</p></section>';
   var t=todayISO(),D=S.day,i=wd.indexOf(D);
   var chips=wd.map(function(d){return '<span class="chip"'+(d===D?' data-now="1"':'')+(d<t?' data-past="1"':'')+' title="'+dayLabel(d)+'">'+d.slice(8)+'</span>';}).join('');
-  return '<section class="card"><div class="row"><span class="lbl">Etapa '+(c.idx+1)+(S.info.stages.length>1?' de '+S.info.stages.length:'')+'</span><span class="of">'+short(wd[0])+' a '+short(wd[wd.length-1])+'</span></div>'+
-    '<div class="row"><span class="big30">'+c.days+' dias úteis</span><span class="of">dia '+(i+1)+' de '+c.days+' · restam '+(c.days-i)+' contando este</span></div>'+
-    '<div class="chips" aria-label="Dias úteis da etapa">'+chips+'</div>'+
-    '<p class="small">Meta por vendedor nesta etapa: '+(c.goalA?fmt(c.goalA)+' em aparelhos':'sem meta de aparelhos')+' · '+(c.goalB?fmt(c.goalB)+' em acessórios':'sem meta de acessórios')+'</p>'+adjNote()+'</section>';
+  return '<section class="card"><div class="row"><span class="lbl">Etapa '+(c.idx+1)+(S.info.stages.length>1?' de '+S.info.stages.length:'')+' · '+short(wd[0])+' a '+short(wd[wd.length-1])+'</span><span class="of">dia '+(i+1)+' de '+c.days+'</span></div>'+
+    '<div class="chips" aria-label="Dias úteis da etapa">'+chips+'</div></section>';
 }
 function adjNote(){
   var cur=S.info.cur,n=S.info.n||1,out=[];
@@ -452,14 +452,13 @@ function catHTML(name,cat,wd){
   if(!sl.goal||!c.goal){
     return h+'<p class="nogoal">'+(sl.goal?(S.info.month[cat.id].goal>0&&S.info.month[cat.id].falta<=0.004?'A meta do mês de '+cat.label.toLowerCase()+' já foi batida. Nada falta nesta etapa.':'Meta de '+cat.label.toLowerCase()+' ainda não definida.'):esc(name)+' está sem meta por enquanto.')+' Vendido na etapa: <b>'+fmt(c.total)+'</b> · no dia: <b>'+fmt(c.day)+'</b>.</p></article>';
   }
-  var t=tone(c.pDay,true),tS=tone(c.pStage,true),done=c.faltaDia<=0.004;
+  var t=tone(c.pDay,true),tS=tone(c.pStage,true),done=c.faltaDia<=0.004,key='s|'+cat.id,open=S.quick===key,fim=c.faltaEtapa<=0.004;
   h+='<div class="hoje" data-tone="'+t+'"><span class="lbl">'+(S.day===todayISO()?'Falta hoje':'Falta em '+dayLabel(S.day))+'</span><span class="big"'+(done?' style="font-size:32px"':'')+'>'+(done?'Meta do dia batida':fmt(c.faltaDia))+'</span>'+
-    '<div class="bar"><i style="width:'+w100(c.pDay)+'%"></i></div><span class="sub">Meta para fechar a etapa '+fmt(c.target)+' · meta fixa '+fmt(c.fixed)+' · vendido no dia '+fmt(c.day)+'</span></div><div class="facts">';
-  if(c.faltaEtapa<=0.004)h+='<div class="fact" data-tone="done"><b>Etapa batida</b><span>meta da etapa concluída</span></div>';
-  else if(c.restAfter>0)h+='<div class="fact"><b>'+fmt(c.next)+'</b><span>por dia nos '+c.restAfter+' '+(c.restAfter>1?'dias':'dia')+' que restam depois deste</span></div>';
-  else h+='<div class="fact" data-tone="low"><b>'+fmt(c.faltaEtapa)+'</b><span>último dia da etapa: é o que falta</span></div>';
-  h+='<div class="fact" data-tone="'+tS+'"><b>'+fmt(c.faltaEtapa)+'</b><span>falta na etapa · '+pct(c.pStage)+' feito</span></div><div class="fact"><b>'+fmt(c.total)+'</b><span>vendido na etapa até '+dayLabel(S.day)+'</span></div></div>';
-  return h+'<div class="bar" data-tone="'+tS+'" role="img" aria-label="'+pct(c.pStage)+' da meta da etapa"><i style="width:'+w100(c.pStage)+'%"></i></div></article>';
+    '<div class="bar"><i style="width:'+w100(c.pDay)+'%"></i></div><span class="sub">Meta de hoje '+fmt(c.target)+' · vendido '+fmt(c.day)+'</span></div>';
+  h+='<div class="bigdonut" data-tone="'+tS+'">'+donutSVG(c.pStage,tS,'da etapa',120)+'<button type="button" class="bigcap qtap" data-quick="'+key+'" aria-expanded="'+open+'"><span class="lbl">'+(fim?'Etapa':'Falta na etapa')+'</span><span class="bnum">'+(fim?'Meta batida':fmt(c.faltaEtapa))+'</span><span class="of">Vendido '+fmt(c.total)+' de '+fmt(c.goal)+'</span><span class="qcta">'+(open?'Fechar':'＋ Toque para lançar '+cat.one)+'</span></button></div>'+quickHTML(cat,name,key);
+  if(!fim&&c.restAfter>0)h+='<p class="small">Meta fixa do dia '+fmt(c.fixed)+'. Depois de hoje: '+fmt(c.next)+' por dia nos '+c.restAfter+' '+(c.restAfter>1?'dias':'dia')+' que restam.</p>';
+  else h+='<p class="small">Meta fixa do dia '+fmt(c.fixed)+'.</p>';
+  return h+'</article>';
 }
 function quickHTML(cat,name,key){
   if(S.quick!==key)return '';
@@ -478,14 +477,13 @@ function logHTML(name){
   var mine=S.sales.filter(function(s){return s.seller===name;}).slice().reverse();
   var log=mine.length?mine.slice(0,40).map(function(s){
     var cat=CATS.filter(function(x){return x.id===s.cat;})[0];
-    return '<li><div><b>'+fmt(s.amount)+'</b> · '+(cat?cat.one:esc(s.cat))+'<div class="when">'+dayLabel(s.date)+'</div></div><button type="button" class="btn ghost" data-del="'+esc(s.id)+'">Apagar</button></li>';
+    return '<li><div><b>'+fmtC(s.amount)+'</b> · '+(cat?cat.one:esc(s.cat))+'<div class="when">'+dayLabel(s.date)+'</div></div><button type="button" class="btn ghost" data-del="'+esc(s.id)+'">Apagar</button></li>';
   }).join(''):'<li class="empty">Nenhuma venda lançada nesta etapa.</li>';
   return '<section class="card"><h2>Lançamentos</h2><ul class="plain log">'+log+'</ul></section>';
 }
 function sellerView(name,wd){
-  return dayPick(wd)+entryHTML(name,wd)+'<div class="stack">'+CATS.map(function(c){return catHTML(name,c,wd)+chartCard(cat_(c),wd,name);}).join('')+'</div>'+logHTML(name);
+  return dayPick(wd)+entryHTML(name,wd)+'<div class="stack">'+CATS.map(function(c){return catHTML(name,c,wd);}).join('')+'</div>'+logHTML(name)+helpHTML();
 }
-
 /* ---------- gráfico de progressão ---------- */
 function cat_(c){return c;}
 var SERIES_COLORS=['var(--c1)','var(--c2)','var(--c3)'];
@@ -556,10 +554,17 @@ function chartCard(cat,wd,name){
   var h=chartHTML(cat,wd,S.day,name);
   return h?'<article class="card"><div class="row"><h2>Progressão · '+cat.label+'</h2><span class="of">% da meta, dia a dia</span></div>'+h+'<p class="small">A linha tracejada é o ritmo ideal para fechar a meta no último dia.</p></article>':'';
 }
+function helpHTML(){
+  return '<details class="card fold"><summary>Como ler esta tela</summary><div class="help">'+
+    '<p class="small"><b>Falta hoje</b> é a meta de hoje menos o vendido no dia. A meta de hoje é o que ainda falta da etapa dividido pelos dias úteis que restam: sobe se um dia passa sem vender e desce se vende mais.</p>'+
+    '<p class="small"><b>Meta fixa do dia</b> é a meta da etapa dividida pelos dias úteis (e pelos vendedores com meta). A soma dos dias dá a meta da etapa.</p>'+
+    '<p class="small">A meta da loja é a soma das metas dos vendedores com meta. A meta do mês é só referência. O que faltou (ou sobrou) numa etapa encerrada soma (ou abate) na etapa seguinte.</p>'+adjNote()+'</div></details>';
+}
 function monthHTML(){
   var info=S.info,m=info.month,list=CATS.filter(function(c){return m[c.id].goal>0;});
   if(!list.length)return '';
-  var out='<section class="card"><div class="row"><h2>Meta do mês</h2><span class="of">vendido até '+dayLabel(S.day)+'</span></div><div class="donuts">'+
+  var sum_=list.map(function(c){var o=m[c.id];return c.label+' '+pct(o.sold/o.goal);}).join(' · ');
+  var out='<details class="card fold"><summary><span>Mês: '+sum_+'</span></summary><div class="donuts">'+
     list.map(function(c){var o=m[c.id],p=o.sold/o.goal;return donutBlock(p,tone(p,true),'do mês',110,fmt(o.sold)+' de '+fmt(o.goal),o.falta>0.004?'falta '+fmt(o.falta):'meta do mês batida',c.label);}).join('')+'</div>';
   list.forEach(function(c){
     out+='<p class="small" style="margin-top:14px"><b>'+c.label+' por etapa</b></p><ul class="plain dlist">'+info.stages.map(function(x,k){
@@ -568,42 +573,33 @@ function monthHTML(){
         '<div class="row"><span class="of">'+fmt(o.sold)+' de <b>'+fmt(o.eff)+'</b>'+(Math.abs(o.eff-o.plan)>0.5?' · cadastrada '+fmt(o.plan):'')+'</span><span class="of">'+(o.eff>0?pct(p):'')+'</span></div></li>';
     }).join('')+'</ul>';
   });
-  return out+'<p class="small">A meta do mês é a referência. Cada etapa tem a meta cadastrada pelo gestor, e o que faltou (ou sobrou) numa etapa encerrada é somado (ou abatido) na etapa seguinte. O mesmo vale dentro da etapa, dia a dia.</p></section>';
+  return out+'</details>';
 }
 function dashView(wd){
-  var D=S.day,t=todayISO(),i=wd.indexOf(D);
-  var h='<section class="card"><div class="row"><h2>Resumo da loja</h2><span class="of">vendido até '+dayLabel(D)+(D===t?' (hoje)':'')+'</span></div>'+
-    '<p class="small">Soma de quem tem meta nesta etapa. A meta da loja é a meta de cada vendedor multiplicada pelo número de vendedores com meta.</p></section>';
-  h+=monthHTML();
+  var D=S.day,i=wd.indexOf(D);
+  var h=monthHTML();
   h+='<div class="stack">'+CATS.map(function(cat){
-    var g=0,sold=0,day=0,extra=0,rows='',sls=[];
+    var g=0,sold=0,day=0,extra=0,rows='';
     S.cfg.sellers.forEach(function(s){
       var c=calc(s.name,cat,wd,D);
       if(s.goal&&c.goal){
-        g+=c.goal;sold+=c.total;day+=c.day;sls.push({name:s.name,c:c});
-        rows+='<li class="drow" data-tone="'+tone(c.pStage,true)+'"><div class="who2"><b>'+esc(s.name)+'</b><span class="of">'+fmt(c.total)+' de '+fmt(c.goal)+'</span></div>'+
+        g+=c.goal;sold+=c.total;day+=c.day;
+        var k='v|'+cat.id+'|'+s.name,can=S.full||s.name===S.me,fim=c.faltaEtapa<=0.004;
+        rows+='<li class="drow" data-tone="'+tone(c.pStage,true)+'"><div class="who2"><b>'+esc(s.name)+'</b><span class="of">'+fmt(c.total)+' de '+fmt(c.goal)+' · '+pct(c.pStage)+'</span></div>'+
           '<div class="bar"><i style="width:'+w100(c.pStage)+'%"></i></div>'+
-          '<div class="row"><span class="of">'+(c.faltaEtapa>0.004?'falta <b>'+fmt(c.faltaEtapa)+'</b>':'<b>meta batida</b>')+'</span><span class="of">'+pct(c.pStage)+'</span></div></li>';
+          '<div class="row"><span class="of">'+(fim?'<b>meta batida</b>':'falta <b>'+fmt(c.faltaEtapa)+'</b>'+(c.faltaDia>0.004?' · hoje '+fmt(c.faltaDia):''))+'</span>'+
+          (can?'<button type="button" class="btn ghost" data-quick="'+esc(k)+'" aria-expanded="'+(S.quick===k)+'">'+(S.quick===k?'Fechar':'＋ Lançar')+'</button>':'')+'</div>'+quickHTML(cat,s.name,k)+'</li>';
       }else{extra+=c.total;}
     });
     var p=g?sold/g:0,tt=tone(p,g>0),falta=Math.max(0,g-sold);
     var hd='<article class="card cat"><div class="row"><h2>'+cat.label+'</h2><span class="of">meta da loja '+(g?fmt(g):'não definida')+'</span></div>';
     if(!g)return hd+'<p class="nogoal">Sem meta de '+cat.label.toLowerCase()+' nesta etapa.</p></article>';
-    if(S.dash==='pizza'){
-      return hd+'<div class="bigdonut" data-tone="'+tt+'">'+donutSVG(p,tt,'da meta da loja',170)+'<button type="button" class="bigcap qtap" data-quick="d|'+cat.id+'" aria-expanded="'+(S.quick==='d|'+cat.id)+'"><span class="lbl">Falta para a meta da loja</span><span class="bnum">'+(falta<=0.004?'Meta batida':fmt(falta))+'</span><span class="of">Vendido '+fmt(sold)+' de '+fmt(g)+'</span><span class="qcta">'+(S.quick==='d|'+cat.id?'Fechar':'＋ Toque para lançar '+cat.one)+'</span></button></div>'+quickHTML(cat,S.full?'':S.me,'d|'+cat.id)+
-        '<div class="facts"><div class="fact"><b>'+fmt(day)+'</b><span>vendido em '+dayLabel(D)+'</span></div><div class="fact"><b>'+(wd.length-i)+' '+((wd.length-i)>1?'dias':'dia')+'</b><span>restam, contando este</span></div></div>'+
-        '<div class="donuts">'+sls.map(function(o){return donutBlock(o.c.pStage,tone(o.c.pStage,true),'',100,fmt(o.c.total)+' de '+fmt(o.c.goal),o.c.faltaEtapa>0.004?'falta '+fmt(o.c.faltaEtapa)+(o.c.faltaDia>0.004?' · hoje '+fmt(o.c.faltaDia):''):'meta batida',o.name,(S.full||o.name===S.me)?'v|'+cat.id+'|'+o.name:'',cat.one);}).join('')+'</div>'+
-        sls.map(function(o){var k='v|'+cat.id+'|'+o.name;return quickHTML(cat,o.name,k);}).join('')+
-        (extra>0?'<p class="small">Fora da meta (vendedores sem meta): '+fmt(extra)+'.</p>':'')+'</article>';
-    }
-    return hd+'<div class="hoje" data-tone="'+tt+'"><span class="lbl">Falta para a meta da loja</span><span class="big"'+(falta<=0.004?' style="font-size:32px"':'')+'>'+(falta<=0.004?'Meta da loja batida':fmt(falta))+'</span>'+
-      '<div class="bar"><i style="width:'+w100(p)+'%"></i></div><span class="sub">Vendido '+fmt(sold)+' de '+fmt(g)+' · '+pct(p)+'</span></div>'+
-      '<div class="facts"><div class="fact"><b>'+fmt(day)+'</b><span>vendido em '+dayLabel(D)+'</span></div>'+
-      '<div class="fact"><b>'+(wd.length-i)+' '+((wd.length-i)>1?'dias':'dia')+'</b><span>restam, contando este</span></div></div>'+
-      (S.dash==='graf'?chartHTML(cat,wd,D,null)+'<ul class="plain dlist dcompact">'+rows+'</ul>':'<ul class="plain dlist">'+rows+'</ul>')+
+    return hd+'<div class="bigdonut" data-tone="'+tt+'">'+donutSVG(p,tt,'da meta da loja',140)+'<button type="button" class="bigcap qtap" data-quick="d|'+cat.id+'" aria-expanded="'+(S.quick==='d|'+cat.id)+'"><span class="lbl">Falta na etapa</span><span class="bnum">'+(falta<=0.004?'Meta batida':fmt(falta))+'</span><span class="of">Vendido '+fmt(sold)+' de '+fmt(g)+'</span><span class="qcta">'+(S.quick==='d|'+cat.id?'Fechar':'＋ Toque para lançar '+cat.one)+'</span></button></div>'+quickHTML(cat,S.full?'':S.me,'d|'+cat.id)+
+      '<p class="of">Vendido em '+dayLabel(D)+': <b>'+fmt(day)+'</b> · restam '+(wd.length-i)+' '+((wd.length-i)>1?'dias':'dia')+'</p>'+
+      '<ul class="plain dlist">'+rows+'</ul>'+
       (extra>0?'<p class="small">Fora da meta (vendedores sem meta): '+fmt(extra)+'.</p>':'')+'</article>';
   }).join('')+'</div>';
-  return h;
+  return h+helpHTML();
 }
 function numStr(v){return v?String(v).replace('.',','):'';}
 function draftFromRaw(){
@@ -693,8 +689,7 @@ function bind(){
   if(el=q('#refresh'))el.onclick=function(){load(false).then(function(){toast('Atualizado.');});};
   document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){S.view=b.dataset.v;S.draft=null;render(true);};});
   if(el=q('#vDay'))el.onchange=function(){S.day=this.value;applyDay();render();};
-  document.querySelectorAll('input[name=dashmode]').forEach(function(r){r.onchange=function(){S.dash=r.value;lsSet(LSK+'-dash',S.dash);render();};});
-  if(el=q('#f'))el.onsubmit=submitSale;
+    if(el=q('#f'))el.onsubmit=submitSale;
   document.querySelectorAll('[data-quick]').forEach(function(b){b.onclick=function(){S.quick=S.quick===b.dataset.quick?'':b.dataset.quick;render();var a=document.getElementById('qAmt');if(a)a.focus();};});
   if(el=q('#qf'))el.onsubmit=submitQuick;
   document.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){
@@ -731,7 +726,7 @@ function doSale(name,cat,date,amt,quick){
   send({action:'add',seller:name,cat:cat,date:date,amount:Math.round(amt*100)/100},null).then(function(ok){
     if(!ok){S.anim=false;return;}
     S.day=date;applyDay();if(quick)S.quick='';render();
-    var wd=workdays(S.cfg),sl=sellerOf(name),c=calc(name,catObj,wd,date),msg='Lançado '+fmt(amt)+' em '+catObj.label.toLowerCase()+'. ';
+    var wd=workdays(S.cfg),sl=sellerOf(name),c=calc(name,catObj,wd,date),msg='Lançado '+fmtC(amt)+' em '+catObj.label.toLowerCase()+'. ';
     if(sl&&sl.goal&&c.goal){
       if(c.faltaEtapa<=0.004)msg+='Meta da etapa batida.';
       else if(c.faltaDia<=0.004)msg+='Meta do dia batida.'+(c.restAfter>0?' Próximo dia: '+fmt(c.next)+'.':'');
