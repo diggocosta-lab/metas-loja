@@ -303,7 +303,7 @@ function calc(name,cat,wd,D){
   var day=sum(mine,function(s){return s.date===D;});
   var restIncl=Math.max(1,n-iR),target=Math.max(0,goal-before)/restIncl;
   var restAfter=n-i-1,upto=before+target*(i-iR)+day;
-  return {goal:goal,total:total,day:day,target:target,faltaDia:Math.max(0,target-day),faltaEtapa:Math.max(0,goal-total),
+  return {goal:goal,fixed:n?goal/n:0,total:total,day:day,target:target,faltaDia:Math.max(0,target-day),faltaEtapa:Math.max(0,goal-total),
     restAfter:restAfter,next:restAfter>0?Math.max(0,goal-upto)/restAfter:null,
     pDay:target>0?day/target:(goal>0?1:0),pStage:goal?total/goal:0};
 }
@@ -454,7 +454,7 @@ function catHTML(name,cat,wd){
   }
   var t=tone(c.pDay,true),tS=tone(c.pStage,true),done=c.faltaDia<=0.004;
   h+='<div class="hoje" data-tone="'+t+'"><span class="lbl">'+(S.day===todayISO()?'Falta hoje':'Falta em '+dayLabel(S.day))+'</span><span class="big"'+(done?' style="font-size:32px"':'')+'>'+(done?'Meta do dia batida':fmt(c.faltaDia))+'</span>'+
-    '<div class="bar"><i style="width:'+w100(c.pDay)+'%"></i></div><span class="sub">Meta do dia '+fmt(c.target)+' · vendido no dia '+fmt(c.day)+'</span></div><div class="facts">';
+    '<div class="bar"><i style="width:'+w100(c.pDay)+'%"></i></div><span class="sub">Meta para fechar a etapa '+fmt(c.target)+' · meta fixa '+fmt(c.fixed)+' · vendido no dia '+fmt(c.day)+'</span></div><div class="facts">';
   if(c.faltaEtapa<=0.004)h+='<div class="fact" data-tone="done"><b>Etapa batida</b><span>meta da etapa concluída</span></div>';
   else if(c.restAfter>0)h+='<div class="fact"><b>'+fmt(c.next)+'</b><span>por dia nos '+c.restAfter+' '+(c.restAfter>1?'dias':'dia')+' que restam depois deste</span></div>';
   else h+='<div class="fact" data-tone="low"><b>'+fmt(c.faltaEtapa)+'</b><span>último dia da etapa: é o que falta</span></div>';

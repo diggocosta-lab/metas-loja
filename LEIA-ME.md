@@ -47,3 +47,9 @@ Para trocar um código ou incluir alguém, edite a lista, salve e publique uma n
 
 ## Segurança
 Quem tiver o link e um código entra com o papel daquele código. Troque o código quando alguém sair da equipe (edite no Apps Script e crie uma nova versão da implantação).
+
+
+## Meta do dia: duas colunas
+Na planilha (abas dos vendedores) e no painel aparecem duas metas por dia:
+- **Meta fixa do dia**: meta da etapa ÷ dias úteis ÷ vendedores com meta. A soma dos dias dá a meta da etapa.
+- **Meta para fechar a etapa**: o que ainda falta da etapa ÷ dias úteis que restam. Sobe se um dia passa sem vender e desce se vende mais. Não deve ser somada.
